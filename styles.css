@@ -322,6 +322,15 @@ body::before {
   transform: translateY(0);
 }
 
+/* Fin du parcours : la flèche → est désactivée sur la dernière fresque */
+.btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+  pointer-events: none;
+  box-shadow: none;
+  transform: none;
+}
+
 /* Focus très visible : pilotage clavier / télécommande */
 :focus-visible {
   outline: 3px solid var(--candle);

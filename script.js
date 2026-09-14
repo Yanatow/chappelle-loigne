@@ -19,8 +19,16 @@ const screens = {
 };
 let currentScreen = "home";
 
-function showScreen(name, focusTarget) {
+/* Retire le focus de l'élément actif : la navigation clavier change
+   d'écran ou de fresque sans jamais mettre un bouton en surbrillance. */
+function clearFocus() {
+  const el = document.activeElement;
+  if (el && el !== document.body && typeof el.blur === "function") el.blur();
+}
+
+function showScreen(name) {
   currentScreen = name;
+  clearFocus();
   // stoppe la vidéo de restitution quand on quitte l'écran de détail
   if (name !== "detail") {
     const v = document.getElementById("detail-video-right");
@@ -29,9 +37,6 @@ function showScreen(name, focusTarget) {
   Object.entries(screens).forEach(([key, el]) =>
     el.classList.toggle("is-active", key === name),
   );
-  const target =
-    focusTarget || screens[name].querySelector('button, [tabindex="0"]');
-  if (target) setTimeout(() => target.focus({ preventScroll: true }), 450);
 }
 
 /* ─────────────── Chargement des données ─────────────── */
@@ -121,7 +126,8 @@ function setSide(side) {
 /* ─────────────── Écran détail ─────────────── */
 
 function openDetail(side, index) {
-  state.side = side;
+  // garde la galerie sur le même versant que la fresque affichée
+  if (state.side !== side) setSide(side);
   state.index = index;
   const list = FRESQUES[side];
   const f = list[index];
@@ -134,6 +140,7 @@ function openDetail(side, index) {
     : versant;
   document.getElementById("detail-counter").textContent =
     `${index + 1} / ${list.length}`;
+  document.getElementById("btn-next").disabled = isLastFresque(side, index);
   document.getElementById("detail-description").textContent =
     f.descriptionLongue || "";
 
@@ -159,17 +166,55 @@ function openDetail(side, index) {
     right.alt = `${f.titre} — restitution`;
   }
 
-  if (currentScreen !== "detail")
-    showScreen("detail", document.getElementById("btn-next"));
+  if (currentScreen !== "detail") showScreen("detail");
+  else clearFocus();
 }
 
-function nextFresque() {
-  openDetail(state.side, (state.index + 1) % FRESQUES[state.side].length);
+/* Parcours linéaire du site :
+   accueil → intro → galerie (nord) → nord 1 … nord N
+           → galerie (sud) → sud 1 … sud M (fin).
+   Utilisé par les boutons ← / → du détail et par le clavier. */
+
+function isLastFresque(side, index) {
+  return side === "sud" && index === FRESQUES.sud.length - 1;
 }
 
-function prevFresque() {
-  const len = FRESQUES[state.side].length;
-  openDetail(state.side, (state.index - 1 + len) % len);
+function showGallery(side) {
+  setSide(side);
+  showScreen("gallery");
+}
+
+function goForward() {
+  if (currentScreen === "home") return showScreen("intro");
+  if (currentScreen === "intro") return showGallery("nord");
+  if (currentScreen === "gallery") {
+    // ouvre la première fresque du versant sélectionné
+    if (FRESQUES[state.side].length) return openDetail(state.side, 0);
+    return;
+  }
+  // détail
+  const { side, index } = state;
+  if (index + 1 < FRESQUES[side].length) return openDetail(side, index + 1);
+  // dernière fresque nord : retour à la galerie, versant sud sélectionné
+  if (side === "nord") return showGallery("sud");
+  // dernière fresque sud : fin du parcours
+}
+
+function goBackward() {
+  if (currentScreen === "intro") return showScreen("home");
+  if (currentScreen === "gallery") {
+    // galerie sud : revient à la dernière fresque nord
+    if (state.side === "sud" && FRESQUES.nord.length)
+      return openDetail("nord", FRESQUES.nord.length - 1);
+    return showScreen("intro");
+  }
+  if (currentScreen === "detail") {
+    const { side, index } = state;
+    if (index > 0) return openDetail(side, index - 1);
+    // première fresque d'un versant : retour à la galerie de ce versant
+    return showGallery(side);
+  }
+  // accueil : début du parcours
 }
 
 /* ─────────────── Événements ─────────────── */
@@ -189,8 +234,8 @@ document
 document
   .getElementById("btn-back")
   .addEventListener("click", () => showScreen("gallery"));
-document.getElementById("btn-next").addEventListener("click", nextFresque);
-document.getElementById("btn-prev").addEventListener("click", prevFresque);
+document.getElementById("btn-next").addEventListener("click", goForward);
+document.getElementById("btn-prev").addEventListener("click", goBackward);
 document
   .querySelectorAll(".segmented-btn")
   .forEach((btn) =>
@@ -198,8 +243,14 @@ document
   );
 
 /* Navigation clavier / télécommande :
-   flèches = déplacer la sélection, Entrée = valider, Échap = retour.
-   Sur l'écran détail, ← / → changent directement de fresque. */
+   → / ↓ / Page suivante  = écran ou fresque suivante
+   ← / ↑ / Page précédente = écran ou fresque précédente
+   Échap / Retour arrière  = remonter d'un niveau
+   Le parcours suit l'ordre : accueil, intro, galerie, puis chaque
+   fresque du versant nord et du versant sud. */
+const FORWARD_KEYS = ["ArrowRight", "ArrowDown", "PageDown"];
+const BACKWARD_KEYS = ["ArrowLeft", "ArrowUp", "PageUp"];
+
 document.addEventListener("keydown", (e) => {
   if (e.key === "Escape" || e.key === "Backspace") {
     e.preventDefault();
@@ -209,34 +260,13 @@ document.addEventListener("keydown", (e) => {
     return;
   }
 
-  if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(e.key))
-    return;
-  e.preventDefault();
-
-  if (currentScreen === "detail") {
-    if (e.key === "ArrowRight") nextFresque();
-    if (e.key === "ArrowLeft") prevFresque();
-    return;
+  if (FORWARD_KEYS.includes(e.key)) {
+    e.preventDefault();
+    goForward();
+  } else if (BACKWARD_KEYS.includes(e.key)) {
+    e.preventDefault();
+    goBackward();
   }
-
-  // Déplacement du focus parmi les éléments visibles de l'écran actif
-  const focusables = [
-    ...screens[currentScreen].querySelectorAll("button"),
-  ].filter((el) => el.offsetParent !== null);
-  const visible = focusables.filter((el) => {
-    const panel = el.closest(".slider-panel");
-    if (!panel) return true;
-    const panels = [...document.querySelectorAll(".slider-panel")];
-    return panels.indexOf(panel) === (state.side === "nord" ? 0 : 1);
-  });
-  if (!visible.length) return;
-  const pos = visible.indexOf(document.activeElement);
-  const forward = e.key === "ArrowRight" || e.key === "ArrowDown";
-  const next =
-    pos === -1
-      ? 0
-      : (pos + (forward ? 1 : -1) + visible.length) % visible.length;
-  visible[next].focus();
 });
 
 /* ─────────────── Initialisation ─────────────── */
