@@ -504,7 +504,16 @@ body::before {
   margin-bottom: clamp(0.6rem, 1.8vmin, 1.4rem);
 }
 
+/* Bouton Accueil ancré en haut à gauche de l'écran, hors de la grille :
+   sa position ne dépend pas de la hauteur du titre / sous-titre */
+#btn-intro-home {
+  position: absolute;
+  top: 3vmin;
+  left: 4vmin;
+}
+
 .intro-heading {
+  grid-column: 2;
   text-align: center;
   min-width: 0;
 }
@@ -523,6 +532,7 @@ body::before {
 }
 
 .intro-header .detail-nav {
+  grid-column: 3;
   justify-self: end;
 }
 
@@ -1469,6 +1479,14 @@ body::before {
   }
   .detail-images {
     grid-template-columns: 1fr;
+  }
+  #btn-intro-home {
+    position: static;
+    justify-self: center;
+  }
+  .intro-heading,
+  .intro-header .detail-nav {
+    grid-column: auto;
   }
   .intro-header .detail-nav {
     justify-self: center;
