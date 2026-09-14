@@ -793,6 +793,9 @@ document
 document
   .getElementById("btn-intro-home")
   .addEventListener("click", () => showScreen("home"));
+document
+  .getElementById("btn-intro-gallery")
+  .addEventListener("click", () => showGallery("nord"));
 document.getElementById("btn-intro-next").addEventListener("click", goForward);
 document.getElementById("btn-intro-prev").addEventListener("click", goBackward);
 document
