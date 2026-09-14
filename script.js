@@ -544,6 +544,7 @@ function openDetail(side, index) {
   document.getElementById("btn-next").disabled = isLastFresque(side, index);
   document.getElementById("detail-description").textContent =
     f.descriptionLongue || "";
+  alignDetailLeft();
 
   const left = document.getElementById("detail-img-left");
   const right = document.getElementById("detail-img-right");
@@ -649,6 +650,60 @@ function toggleMute() {
 
 replayBtn.addEventListener("click", replayFresqueSound);
 muteBtn.addEventListener("click", toggleMute);
+
+/* ─── Masquer / afficher le parchemin de texte de l'écran détail ─── */
+
+const detailScreen = document.getElementById("screen-detail");
+const textToggleBtn = document.getElementById("btn-text-toggle");
+const TEXT_STORAGE_KEY = "viaulnay-texte-masque";
+
+let textHidden = false;
+try {
+  textHidden = localStorage.getItem(TEXT_STORAGE_KEY) === "1";
+} catch (_) {
+  /* stockage indisponible : le texte reste affiché */
+}
+
+/* Aligne le coin gauche de l'en-tête (Retour, son, texte) sur le bord
+   visible de la photo de gauche : inclinée en 3D, elle déborde de sa
+   colonne vers la gauche, d'une quantité qui dépend de la largeur */
+function alignDetailLeft() {
+  const header = detailScreen.querySelector(".detail-header");
+  const figure = detailScreen.querySelector(".detail-figure");
+  const h = header.getBoundingClientRect();
+  const f = figure.getBoundingClientRect();
+  if (!h.width || !f.width) return;
+  // l'écran peut être en transition (scale) : on ramène à l'échelle réelle
+  const scale = h.width / header.offsetWidth || 1;
+  const offset = Math.min(0, (f.left - h.left) / scale);
+  header.style.setProperty("--detail-left-offset", `${offset}px`);
+}
+
+window.addEventListener("resize", alignDetailLeft);
+
+function updateTextToggle() {
+  detailScreen.classList.toggle("text-hidden", textHidden);
+  alignDetailLeft();
+  textToggleBtn.classList.toggle("is-hidden", textHidden);
+  textToggleBtn.setAttribute("aria-pressed", String(textHidden));
+  const label = textHidden ? "Afficher le texte" : "Masquer le texte";
+  textToggleBtn.setAttribute("aria-label", label);
+  textToggleBtn.title = label;
+}
+
+function toggleText() {
+  textHidden = !textHidden;
+  try {
+    localStorage.setItem(TEXT_STORAGE_KEY, textHidden ? "1" : "0");
+  } catch (_) {
+    /* stockage indisponible : l'état ne vaut que pour cette visite */
+  }
+  updateTextToggle();
+  clearFocus();
+}
+
+textToggleBtn.addEventListener("click", toggleText);
+updateTextToggle();
 detailAudio.addEventListener("play", () =>
   soundControls.classList.add("is-playing"),
 );

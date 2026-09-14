@@ -132,6 +132,16 @@
             </svg>
           </button>
         </div>
+        <!-- Masquer / afficher le parchemin de texte : les deux photos
+             occupent alors toute la largeur (choix mémorisé) -->
+        <button id="btn-text-toggle" class="btn btn-secondary btn-icon btn-text-toggle" type="button" aria-label="Masquer le texte" title="Masquer le texte" aria-pressed="false">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M4 6h16" />
+            <path class="text-line" d="M4 12h16" />
+            <path class="text-line" d="M4 18h10" />
+            <path class="text-cross" d="m14 12 6 6M20 12l-6 6" />
+          </svg>
+        </button>
       </div>
       <audio id="detail-audio" preload="auto"></audio>
       <div class="detail-heading">

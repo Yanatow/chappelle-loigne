@@ -956,10 +956,12 @@ body::before {
   gap: clamp(1rem, 2.4vmin, 2.2rem);
 }
 
-/* Coin gauche de l'en-tête : bouton Retour, puis commandes du son */
+/* Coin gauche de l'en-tête : bouton Retour, puis commandes du son.
+   Calé sur le bord visible de la photo de gauche, qui déborde de sa
+   colonne à cause de l'inclinaison 3D (décalage mesuré en JS) */
 .detail-header .detail-left {
   position: absolute;
-  left: 0;
+  left: var(--detail-left-offset, 0px);
   top: 50%;
   transform: translateY(-50%);
   display: flex;
@@ -987,7 +989,7 @@ body::before {
   display: none;
 }
 
-.detail-sound .btn-icon {
+.detail-left .btn-icon {
   width: 2.7em;
   height: 2.7em;
   padding: 0;
@@ -1026,6 +1028,75 @@ body::before {
 
 .btn-sound-mute.is-muted .sound-cross {
   display: block;
+}
+
+/* ─── Masquer le texte : bouton discret, séparé par le même trait doré ─── */
+
+.btn-text-toggle {
+  padding-left: clamp(0.6rem, 1.4vmin, 1.1rem);
+  margin-left: 0;
+  position: relative;
+  opacity: 0.55;
+  transition:
+    opacity 220ms ease,
+    background 220ms ease,
+    border-color 220ms ease;
+}
+
+.btn-text-toggle::before {
+  content: "";
+  position: absolute;
+  left: calc(-1 * clamp(0.6rem, 1.4vmin, 1.1rem) / 2 - 0.5px);
+  top: 15%;
+  height: 70%;
+  border-left: 1px solid var(--border);
+}
+
+.btn-text-toggle:hover,
+.btn-text-toggle:focus-visible,
+.btn-text-toggle[aria-pressed="true"] {
+  opacity: 1;
+}
+
+/* texte masqué : les lignes du bas laissent place à une croix */
+.text-cross {
+  display: none;
+}
+
+.btn-text-toggle.is-hidden .text-line {
+  display: none;
+}
+
+.btn-text-toggle.is-hidden .text-cross {
+  display: block;
+}
+
+/* Parchemin masqué : le diptyque s'étale sur toute la largeur, le titre
+   reste centré sur les photos et la navigation rejoint le bord droit */
+#screen-detail.text-hidden .detail-parchment-wrap {
+  display: none;
+}
+
+#screen-detail.text-hidden .detail-images,
+#screen-detail.text-hidden .detail-header {
+  grid-template-columns: 1fr 1fr;
+}
+
+/* colonnes plus larges : inclinaison adoucie pour que la photo de
+   gauche ne sorte pas de l'écran */
+#screen-detail.text-hidden .detail-images > :nth-child(1) {
+  transform: rotateY(5deg);
+}
+#screen-detail.text-hidden .detail-images > :nth-child(2) {
+  transform: rotateY(-5deg);
+}
+
+#screen-detail.text-hidden .detail-header .detail-nav {
+  grid-column: auto;
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 .detail-heading {
@@ -1510,8 +1581,15 @@ body::before {
     transform: none;
     justify-self: center;
   }
-  .detail-nav {
+  .detail-nav,
+  #screen-detail.text-hidden .detail-header .detail-nav {
+    position: static;
+    transform: none;
     justify-self: center;
+  }
+  #screen-detail.text-hidden .detail-images,
+  #screen-detail.text-hidden .detail-header {
+    grid-template-columns: 1fr;
   }
   .detail-images > * {
     transform: none !important;
