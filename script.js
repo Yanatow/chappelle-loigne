@@ -9,7 +9,7 @@ const FRESQUES = { nord: [], sud: [] };
 
 /* ─────────────── État & navigation entre écrans ─────────────── */
 
-const state = { side: "nord", index: 0 };
+const state = { side: "nord", index: 0, introPart: 0 };
 
 const screens = {
   home: document.getElementById("screen-home"),
@@ -29,6 +29,7 @@ function clearFocus() {
 function showScreen(name) {
   currentScreen = name;
   clearFocus();
+  if (typeof closeLightbox === "function" && name !== "intro") closeLightbox();
   // stoppe la vidéo de restitution quand on quitte l'écran de détail
   if (name !== "detail") {
     const v = document.getElementById("detail-video-right");
@@ -55,29 +56,289 @@ function loadFresques() {
   setSide("nord");
 }
 
-/* ─────────────── Écran d'introduction ─────────────── */
+/* ─────────────── Écran d'introduction (3 parties) ─────────────── */
 
-function renderIntro() {
-  const intro =
-    typeof FRESQUES_DATA === "object" && FRESQUES_DATA !== null
-      ? FRESQUES_DATA.intro
-      : null;
-  if (!intro) return;
-  if (intro.titre)
-    document.getElementById("intro-title").textContent = intro.titre;
-  document.getElementById("intro-text").textContent = intro.texte || "";
-  document.getElementById("intro-caption").textContent = intro.legende || "";
-  const img = document.getElementById("intro-img");
-  if (intro.image) {
-    // si le fichier est absent, le onerror de la balise affiche
-    // l'emplacement en attente (cadre .is-empty)
-    img.src = intro.image;
-    img.alt = intro.legende || intro.titre || "Illustration";
-  } else {
-    img.hidden = true;
-    img.closest("figure").classList.add("is-empty");
-  }
+/* Parties déclarées dans data.js (intro[]) : titre, sous-titre et
+   liste de photos. Une entrée de `images` peut être un couple
+   [a, b] : les deux photos restent côte à côte sur la même ligne. */
+const INTRO_PARTS =
+  typeof FRESQUES_DATA === "object" &&
+  FRESQUES_DATA !== null &&
+  Array.isArray(FRESQUES_DATA.intro)
+    ? FRESQUES_DATA.intro
+    : [];
+
+/* Photos de la partie affichée, à plat, pour la fenêtre d'agrandissement */
+let introPhotos = [];
+
+function introPartCount() {
+  return INTRO_PARTS.length;
 }
+
+function showIntro(part) {
+  if (!introPartCount()) return showGallery("nord");
+  const p = Math.min(introPartCount() - 1, Math.max(0, part));
+  const changed = p !== state.introPart || currentScreen !== "intro";
+  state.introPart = p;
+  const data = INTRO_PARTS[p];
+
+  document.getElementById("intro-title").textContent = data.titre || "";
+  document.getElementById("intro-subtitle").textContent =
+    data.sousTitre || "";
+  document.getElementById("intro-counter").textContent =
+    `${p + 1} / ${introPartCount()}`;
+  document.getElementById("btn-intro-prev").disabled = p === 0;
+
+  if (changed) renderMosaic(data.images || []);
+  if (currentScreen !== "intro") {
+    showScreen("intro");
+    // sur petit écran la section était masquée (display: none) : ses
+    // dimensions ne sont connues qu'une fois affichée
+    requestAnimationFrame(layoutMosaic);
+  } else clearFocus();
+}
+
+/* Construit les tuiles de la mosaïque. Chaque tuile porte une ou deux
+   photos ; la mise en page (hauteur des lignes) est calculée ensuite
+   par layoutMosaic(), une fois les dimensions des photos connues. */
+function renderMosaic(images) {
+  const viewport = document.getElementById("mosaic-viewport");
+  const old = document.getElementById("mosaic");
+  const mosaic = document.createElement("div");
+  mosaic.className = "mosaic";
+  mosaic.id = "mosaic";
+  introPhotos = [];
+
+  const pending = [];
+  images.forEach((entry) => {
+    const files = Array.isArray(entry) ? entry : [entry];
+    const tile = document.createElement("div");
+    tile.className = "mosaic-tile" + (files.length > 1 ? " is-pair" : "");
+    files.forEach((src) => {
+      const index = introPhotos.length;
+      introPhotos.push(src);
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "mosaic-item";
+      btn.setAttribute("aria-label", `Agrandir la photo ${index + 1}`);
+      const img = document.createElement("img");
+      img.src = src;
+      img.alt = "";
+      img.decoding = "async";
+      // ratio par défaut tant que la photo n'est pas chargée
+      btn.dataset.ratio = "1.333";
+      pending.push(
+        new Promise((resolve) => {
+          const done = () => {
+            if (img.naturalWidth && img.naturalHeight)
+              btn.dataset.ratio = String(img.naturalWidth / img.naturalHeight);
+            resolve();
+          };
+          if (img.complete && img.naturalWidth) done();
+          else {
+            img.addEventListener("load", done, { once: true });
+            img.addEventListener("error", resolve, { once: true });
+          }
+        }),
+      );
+      btn.appendChild(img);
+      btn.addEventListener("click", () => openLightbox(index));
+      tile.appendChild(btn);
+    });
+    mosaic.appendChild(tile);
+  });
+
+  old.replaceWith(mosaic);
+  viewport.scrollTop = 0;
+  layoutMosaic();
+  Promise.all(pending).then(() => {
+    // ne relance la mise en page que si cette mosaïque est toujours affichée
+    if (document.getElementById("mosaic") === mosaic) layoutMosaic();
+  });
+}
+
+/* Mise en page « justifiée » : les tuiles d'une même ligne partagent la
+   même hauteur et remplissent exactement la largeur. On cherche la plus
+   grande hauteur de ligne « cible » pour laquelle l'ensemble tient dans
+   la zone ; au-delà d'un minimum, la mosaïque défile. */
+const MOSAIC_MIN_ROW = 120;
+
+function layoutMosaic() {
+  const viewport = document.getElementById("mosaic-viewport");
+  const mosaic = document.getElementById("mosaic");
+  if (!mosaic || !viewport) return;
+  const tiles = Array.from(mosaic.children);
+  if (!tiles.length) return;
+
+  const gap = parseFloat(getComputedStyle(mosaic).gap) || 16;
+  const vs = getComputedStyle(viewport);
+  const W =
+    viewport.clientWidth -
+    parseFloat(vs.paddingLeft) -
+    parseFloat(vs.paddingRight);
+  const H =
+    viewport.clientHeight -
+    parseFloat(vs.paddingTop) -
+    parseFloat(vs.paddingBottom);
+  if (W <= 0 || H <= 0) return;
+
+  // une tuile de hauteur h mesure r·h + écart interne (photos côte à côte)
+  const specs = tiles.map((tile) => {
+    const items = Array.from(tile.children);
+    const r = items.reduce((sum, it) => sum + parseFloat(it.dataset.ratio), 0);
+    return { r, inner: gap * (items.length - 1) };
+  });
+  const widthAt = (t, h) => t.r * h + t.inner;
+
+  /* Découpe en lignes pour une hauteur cible h : une tuile rejoint la
+     ligne courante si cela rapproche la ligne de la largeur W (léger
+     dépassement toléré, résorbé ensuite en réduisant la hauteur). Chaque
+     ligne prend la hauteur qui remplit W ; une dernière ligne incomplète
+     garde la hauteur cible. Renvoie les lignes et la hauteur totale. */
+  function pack(h) {
+    const rows = [];
+    let row = [];
+    let used = 0;
+    specs.forEach((t, i) => {
+      const w = widthAt(t, h);
+      const next = used + (row.length ? gap : 0) + w;
+      if (row.length && Math.abs(next - W) > Math.abs(used - W)) {
+        rows.push(row);
+        row = [];
+        used = w;
+      } else used = next;
+      row.push(i);
+    });
+    if (row.length) rows.push(row);
+
+    const heights = rows.map((r, ri) => {
+      const sumR = r.reduce((s, i) => s + specs[i].r, 0);
+      const fixed = r.reduce((s, i) => s + specs[i].inner, 0) + gap * (r.length - 1);
+      const fill = (W - fixed) / sumR;
+      const last = ri === rows.length - 1;
+      // dernière ligne incomplète : pas d'étirement au-delà de la cible
+      return last && fill > h ? h : fill;
+    });
+    const total = heights.reduce((s, x) => s + x, 0) + gap * (rows.length - 1);
+    return { rows, heights, total };
+  }
+
+  // plus grande hauteur cible dont la mise en page tient dans la zone
+  let best = null;
+  for (let h = Math.floor(H); h >= MOSAIC_MIN_ROW; h -= 2) {
+    const candidate = pack(h);
+    if (candidate.total <= H) {
+      best = candidate;
+      break;
+    }
+  }
+  if (!best) best = pack(MOSAIC_MIN_ROW); // trop de photos : défilement
+
+  best.rows.forEach((row, ri) => {
+    const rowH = best.heights[ri];
+    row.forEach((i) => {
+      const tile = tiles[i];
+      tile.style.height = `${rowH}px`;
+      tile.style.width = `${widthAt(specs[i], rowH)}px`;
+      Array.from(tile.children).forEach((it) => {
+        it.style.width = `${parseFloat(it.dataset.ratio) * rowH}px`;
+      });
+    });
+  });
+}
+
+let mosaicResizeTimer = null;
+window.addEventListener("resize", () => {
+  clearTimeout(mosaicResizeTimer);
+  mosaicResizeTimer = setTimeout(() => {
+    layoutMosaic();
+    if (isLightboxOpen()) fitLightboxImage();
+  }, 120);
+});
+
+/* ─────────────── Fenêtre d'agrandissement ─────────────── */
+
+const lightbox = document.getElementById("lightbox");
+let lightboxIndex = 0;
+
+function isLightboxOpen() {
+  return !lightbox.hidden;
+}
+
+/* Agrandit la photo au maximum de la fenêtre en respectant son ratio
+   (les originaux sont petits : sans cela ils resteraient à leur taille) */
+function fitLightboxImage() {
+  const img = document.getElementById("lightbox-img");
+  const box = document.querySelector(".lightbox-figure");
+  const caption = document.getElementById("lightbox-counter");
+  if (!img.naturalWidth || !img.naturalHeight || !box) return;
+  const ls = getComputedStyle(lightbox);
+  const maxW =
+    lightbox.clientWidth -
+    parseFloat(ls.paddingLeft) -
+    parseFloat(ls.paddingRight);
+  const maxH =
+    lightbox.clientHeight -
+    parseFloat(ls.paddingTop) -
+    parseFloat(ls.paddingBottom) -
+    (caption ? caption.offsetHeight + parseFloat(getComputedStyle(caption).marginTop) : 0);
+  // la bordure (content-box) s'ajoute autour de la photo : on la retire
+  // de l'espace disponible, et on ne fixe que la largeur pour que le
+  // navigateur conserve exactement le ratio de l'image
+  const is = getComputedStyle(img);
+  const bx = parseFloat(is.borderLeftWidth) + parseFloat(is.borderRightWidth);
+  const by = parseFloat(is.borderTopWidth) + parseFloat(is.borderBottomWidth);
+  const scale = Math.min(
+    (maxW - bx) / img.naturalWidth,
+    (maxH - by) / img.naturalHeight,
+  );
+  img.style.width = `${Math.floor(img.naturalWidth * scale)}px`;
+  img.style.height = "auto";
+}
+
+function openLightbox(index) {
+  if (!introPhotos.length) return;
+  lightboxIndex = Math.min(introPhotos.length - 1, Math.max(0, index));
+  const img = document.getElementById("lightbox-img");
+  img.style.width = "";
+  img.style.height = "";
+  img.onload = fitLightboxImage;
+  img.src = introPhotos[lightboxIndex];
+  img.alt = `Photo ${lightboxIndex + 1} sur ${introPhotos.length}`;
+  document.getElementById("lightbox-counter").textContent =
+    `${lightboxIndex + 1} / ${introPhotos.length}`;
+  document.getElementById("lightbox-prev").disabled = lightboxIndex === 0;
+  document.getElementById("lightbox-next").disabled =
+    lightboxIndex === introPhotos.length - 1;
+  if (lightbox.hidden) {
+    lightbox.hidden = false;
+    // force le reflow avant d'animer l'apparition
+    void lightbox.offsetWidth;
+    lightbox.classList.add("is-open");
+  }
+  clearFocus();
+}
+
+function closeLightbox() {
+  if (lightbox.hidden) return;
+  lightbox.classList.remove("is-open");
+  lightbox.hidden = true;
+  document.getElementById("lightbox-img").removeAttribute("src");
+  clearFocus();
+}
+
+document.getElementById("lightbox-close").addEventListener("click", closeLightbox);
+document
+  .getElementById("lightbox-prev")
+  .addEventListener("click", () => openLightbox(lightboxIndex - 1));
+document
+  .getElementById("lightbox-next")
+  .addEventListener("click", () => openLightbox(lightboxIndex + 1));
+// clic sur le fond (hors photo et boutons) : fermeture
+lightbox.addEventListener("click", (e) => {
+  if (e.target === lightbox || e.target.classList.contains("lightbox-figure"))
+    closeLightbox();
+});
 
 /* ─────────────── Galerie & window component ─────────────── */
 
@@ -171,7 +432,7 @@ function openDetail(side, index) {
 }
 
 /* Parcours linéaire du site :
-   accueil → intro → galerie (nord) → nord 1 … nord N
+   accueil → intro 1 → intro 2 → intro 3 → galerie (nord) → nord 1 … nord N
            → galerie (sud) → sud 1 … sud M (fin).
    Utilisé par les boutons ← / → du détail et par le clavier. */
 
@@ -185,8 +446,13 @@ function showGallery(side) {
 }
 
 function goForward() {
-  if (currentScreen === "home") return showScreen("intro");
-  if (currentScreen === "intro") return showGallery("nord");
+  if (currentScreen === "home") return showIntro(0);
+  if (currentScreen === "intro") {
+    // parties de l'introduction, puis galerie nord
+    if (state.introPart + 1 < introPartCount())
+      return showIntro(state.introPart + 1);
+    return showGallery("nord");
+  }
   if (currentScreen === "gallery") {
     // ouvre la première fresque du versant sélectionné
     if (FRESQUES[state.side].length) return openDetail(state.side, 0);
@@ -201,12 +467,16 @@ function goForward() {
 }
 
 function goBackward() {
-  if (currentScreen === "intro") return showScreen("home");
+  if (currentScreen === "intro") {
+    if (state.introPart > 0) return showIntro(state.introPart - 1);
+    return showScreen("home");
+  }
   if (currentScreen === "gallery") {
     // galerie sud : revient à la dernière fresque nord
     if (state.side === "sud" && FRESQUES.nord.length)
       return openDetail("nord", FRESQUES.nord.length - 1);
-    return showScreen("intro");
+    // galerie nord : dernière partie de l'introduction
+    return showIntro(introPartCount() - 1);
   }
   if (currentScreen === "detail") {
     const { side, index } = state;
@@ -221,13 +491,12 @@ function goBackward() {
 
 document
   .getElementById("btn-start")
-  .addEventListener("click", () => showScreen("intro"));
+  .addEventListener("click", () => showIntro(0));
 document
   .getElementById("btn-intro-home")
   .addEventListener("click", () => showScreen("home"));
-document
-  .getElementById("btn-intro-continue")
-  .addEventListener("click", () => showScreen("gallery"));
+document.getElementById("btn-intro-next").addEventListener("click", goForward);
+document.getElementById("btn-intro-prev").addEventListener("click", goBackward);
 document
   .getElementById("btn-home")
   .addEventListener("click", () => showScreen("home"));
@@ -252,10 +521,25 @@ const FORWARD_KEYS = ["ArrowRight", "ArrowDown", "PageDown"];
 const BACKWARD_KEYS = ["ArrowLeft", "ArrowUp", "PageUp"];
 
 document.addEventListener("keydown", (e) => {
+  // fenêtre d'agrandissement ouverte : elle capte toute la navigation
+  if (isLightboxOpen()) {
+    if (e.key === "Escape" || e.key === "Backspace") {
+      e.preventDefault();
+      closeLightbox();
+    } else if (FORWARD_KEYS.includes(e.key)) {
+      e.preventDefault();
+      openLightbox(lightboxIndex + 1);
+    } else if (BACKWARD_KEYS.includes(e.key)) {
+      e.preventDefault();
+      openLightbox(lightboxIndex - 1);
+    }
+    return;
+  }
+
   if (e.key === "Escape" || e.key === "Backspace") {
     e.preventDefault();
     if (currentScreen === "detail") showScreen("gallery");
-    else if (currentScreen === "gallery") showScreen("intro");
+    else if (currentScreen === "gallery") showIntro(introPartCount() - 1);
     else if (currentScreen === "intro") showScreen("home");
     return;
   }
@@ -271,5 +555,12 @@ document.addEventListener("keydown", (e) => {
 
 /* ─────────────── Initialisation ─────────────── */
 
-renderIntro();
 loadFresques();
+// prépare la première partie de l'introduction (titre, mosaïque) sans l'afficher
+if (introPartCount()) {
+  const first = INTRO_PARTS[0];
+  document.getElementById("intro-title").textContent = first.titre || "";
+  document.getElementById("intro-subtitle").textContent = first.sousTitre || "";
+  document.getElementById("intro-counter").textContent = `1 / ${introPartCount()}`;
+  document.getElementById("btn-intro-prev").disabled = true;
+}

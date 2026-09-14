@@ -32,35 +32,38 @@
     </div>
   </section>
 
-  <!-- ═══════════════ ÉCRAN 2 · INTRODUCTION ═══════════════ -->
+  <!-- ═══════════════ ÉCRAN 2 · INTRODUCTION ═══════════════
+       Trois parties (data.js → intro[]) : titre + sous-titre en haut,
+       puis une mosaïque de photos ; chaque photo s'ouvre en grand -->
   <section id="screen-intro" class="screen" aria-label="Introduction">
-    <header class="gallery-header">
+    <header class="gallery-header intro-header">
       <button id="btn-intro-home" class="btn btn-ghost" type="button">✠&nbsp; Accueil</button>
-      <h2 class="gallery-title" id="intro-title">Aux origines de la chapelle</h2>
-      <span aria-hidden="true"></span>
+      <div class="intro-heading">
+        <h2 class="gallery-title" id="intro-title"></h2>
+        <p class="intro-subtitle" id="intro-subtitle"></p>
+      </div>
+      <div class="detail-nav">
+        <button id="btn-intro-prev" class="btn btn-primary btn-arrow" type="button" aria-label="Partie précédente">←</button>
+        <span class="detail-counter" id="intro-counter"></span>
+        <button id="btn-intro-next" class="btn btn-primary btn-arrow" type="button" aria-label="Partie suivante">→</button>
+      </div>
     </header>
 
-    <div class="intro-layout">
-      <div class="parchment-sheet-wrap intro-parchment-wrap">
-        <div class="parchment-sheet">
-          <p id="intro-text"></p>
-        </div>
-      </div>
-      <figure class="detail-figure intro-figure">
-        <img
-          id="intro-img"
-          src=""
-          alt=""
-          onerror="this.hidden=true;this.closest('figure').classList.add('is-empty')"
-        />
-        <figcaption id="intro-caption"></figcaption>
-      </figure>
+    <div class="mosaic-viewport" id="mosaic-viewport">
+      <div class="mosaic" id="mosaic"></div>
     </div>
-
-    <button id="btn-intro-continue" class="btn btn-primary" type="button">
-      Découvrir les fresques
-    </button>
   </section>
+
+  <!-- Fenêtre d'agrandissement d'une photo de l'introduction -->
+  <div id="lightbox" class="lightbox" role="dialog" aria-modal="true" aria-label="Photo agrandie" hidden>
+    <button id="lightbox-close" class="btn btn-secondary lightbox-close" type="button" aria-label="Fermer">✕</button>
+    <button id="lightbox-prev" class="btn btn-primary btn-arrow lightbox-arrow lightbox-arrow-prev" type="button" aria-label="Photo précédente">←</button>
+    <figure class="lightbox-figure">
+      <img id="lightbox-img" src="" alt="" />
+      <figcaption id="lightbox-counter"></figcaption>
+    </figure>
+    <button id="lightbox-next" class="btn btn-primary btn-arrow lightbox-arrow lightbox-arrow-next" type="button" aria-label="Photo suivante">→</button>
+  </div>
 
   <!-- ═══════════════ ÉCRAN 3 · GALERIE ═══════════════ -->
   <section id="screen-gallery" class="screen" aria-label="Liste des fresques">

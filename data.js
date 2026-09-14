@@ -9,25 +9,62 @@
      descriptionCourte sous-titre de la card et de l écran de détail
      descriptionLongue texte du parchemin à droite des deux photos
    L écran d introduction (entre l accueil et la galerie) se gère
-   dans le bloc « intro » :
-     titre    titre de l écran
-     texte    texte du parchemin (moitié gauche)
-     image    illustration (moitié droite) ; laisser vide ou pointer
-              vers un fichier absent affiche un emplacement en attente
-     legende  légende sous l illustration
+   dans le tableau « intro » : une entrée par partie, chacune avec
+     titre      titre affiché en haut de l écran
+     sousTitre  sous-titre sous le titre
+     images     liste des photos de la mosaïque, dans l ordre ;
+                un couple [ "a.jpg", "b.jpg" ] affiche les deux photos
+                côte à côte, toujours sur la même ligne
+   Au clic, une photo de la mosaïque s ouvre en grand (fenêtre
+   refermable par ✕, Échap ou un clic à côté).
    L ordre des entrées est l ordre d affichage. Ce fichier est du
    JSON enrobé d une affectation JavaScript, pour fonctionner sans
    serveur HTTP (ouverture d index.html par double-clic).
    ═══════════════════════════════════════════════════════════ */
 
 const FRESQUES_DATA = {
-  intro: {
-    titre: "Aux origines de la chapelle",
-    texte:
-      "Texte d'introduction à compléter. Élevée vers 1560 au bord de la Mayenne, la chapelle Notre-Dame de Pitié du Viaulnay abrite sous sa charpente un ensemble de fresques rare dans le Bas-Maine. Mises au jour lors des restaurations, elles se déploient sur les deux versants de la nef : les pages qui suivent invitent à les parcourir, du versant nord au versant sud.",
-    image: "intro.jpg",
-    legende: "La chapelle du Viaulnay",
-  },
+  intro: [
+    {
+      titre: "1 - Restauration",
+      sousTitre:
+        "La chapelle Notre Dame de Pitié lors de notre arrivée en 1990",
+      images: [
+        "introduction/1/image001.jpg",
+        "introduction/1/image003.jpg",
+        "introduction/1/image005.jpg",
+        "introduction/1/image007.jpg",
+        "introduction/1/image009.jpg",
+        "introduction/1/image011.jpg",
+        "introduction/1/image013.jpg",
+        "introduction/1/image015.jpg",
+        "introduction/1/image017.jpg",
+        "introduction/1/image019.jpg",
+      ],
+    },
+    {
+      titre: "2 - Historique",
+      sousTitre:
+        "Depuis de nombreuses années, François Mauguy, propriétaire du manoir du Viaulnay et de ses terres, souffre de la maladie de la goutte.",
+      images: [
+        "introduction/2/image021.jpg",
+        "introduction/2/image023.jpg",
+        "introduction/2/image025.jpg",
+        "introduction/2/2731.png",
+        "introduction/2/image033.jpg",
+      ],
+    },
+    {
+      titre: "3 - Les beaux arts et le monde",
+      sousTitre:
+        "Le ministère de la Culture en fait l’acquisition le 10 juin 1896 et va l’exposer dans plusieurs salons.",
+      images: [
+        "introduction/3/image035.jpg",
+        "introduction/3/image037.jpg",
+        "introduction/3/3941.png",
+        "introduction/3/4345.png",
+      ],
+    },
+  ],
   nord: [
     {
       photo: "nord/1.jpg",
