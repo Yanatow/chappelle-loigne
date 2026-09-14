@@ -743,6 +743,8 @@ document.getElementById("btn-intro-prev").addEventListener("click", goBackward);
 document
   .getElementById("btn-home")
   .addEventListener("click", () => showScreen("home"));
+document.getElementById("btn-thanks").addEventListener("click", showOutro);
+document.getElementById("btn-thanks").hidden = !hasOutro();
 document
   .getElementById("btn-back")
   .addEventListener("click", () => showScreen("gallery"));

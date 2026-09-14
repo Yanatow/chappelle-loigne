@@ -393,8 +393,7 @@ const FRESQUES_DATA = {
   ],
 
   outro: {
-    titre: "Prière des pèlerins",
-    sousTitre: "Chapelle du Viaulnay · Notre-Dame de Pitié",
+    titre: "Merci de votre visite",
     images: [{ src: "outro/jeanne2.jpg" }, { src: "outro/jeanne.jpeg" }],
     titreTexte:
       "Prière des pèlerins de la chapelle du Viaulnay à Notre-Dame de Pitié",

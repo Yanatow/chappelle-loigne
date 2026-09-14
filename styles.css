@@ -729,8 +729,12 @@ body::before {
   margin-bottom: clamp(0.8rem, 2.4vmin, 2rem);
 }
 
-.gallery-header .btn-ghost {
+.gallery-header .gallery-actions {
   justify-self: start;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.5rem;
 }
 
 .gallery-title {
@@ -1456,9 +1460,12 @@ body::before {
     grid-template-columns: 1fr;
     justify-items: center;
   }
-  .gallery-header .btn-ghost,
+  .gallery-header .gallery-actions,
   .segmented {
     justify-self: center;
+  }
+  .gallery-header .gallery-actions {
+    justify-content: center;
   }
   .detail-images {
     grid-template-columns: 1fr;
