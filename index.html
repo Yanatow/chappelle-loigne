@@ -165,7 +165,12 @@
       </figure>
       <figure class="detail-figure">
         <img id="detail-img-right" src="" alt="" />
-        <video id="detail-video-right" muted loop playsinline hidden></video>
+        <!-- Vidéo purement visuelle : son définitivement coupé (verrouillé
+             côté JS), pas de contrôles natifs ni de picture-in-picture -->
+        <video id="detail-video-right" muted loop playsinline
+               disablepictureinpicture disableremoteplayback
+               controlslist="nodownload noremoteplayback noplaybackrate"
+               tabindex="-1" hidden></video>
         <figcaption>Restitution</figcaption>
       </figure>
       <div class="parchment-sheet-wrap detail-parchment-wrap">

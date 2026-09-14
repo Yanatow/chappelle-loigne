@@ -560,6 +560,8 @@ function openDetail(side, index) {
   if (isVideo) {
     right.removeAttribute("src");
     rightVideo.src = restored;
+    rightVideo.muted = true;
+    rightVideo.volume = 0;
     rightVideo.play().catch(() => {});
   } else {
     rightVideo.pause();
@@ -908,8 +910,44 @@ if (fullscreenEnabled()) {
   fullscreenBtn.hidden = true;
 }
 
+/* ─────────────── Vidéo de restitution : son verrouillé ───────────────
+   La vidéo de l'écran détail est purement visuelle. Son son est coupé en
+   permanence et ne peut être réactivé par aucun moyen : ni via les
+   contrôles natifs (menu contextuel « Afficher les commandes »), ni via le
+   picture-in-picture, ni au clavier, ni par script. */
+
+function lockVideoSound() {
+  const v = document.getElementById("detail-video-right");
+  if (!v) return;
+  const enforce = () => {
+    if (!v.muted) v.muted = true;
+    if (v.volume !== 0) v.volume = 0;
+    if (v.hasAttribute("controls")) v.removeAttribute("controls");
+  };
+  enforce();
+  // toute tentative de réactivation est immédiatement annulée
+  v.addEventListener("volumechange", enforce);
+  v.addEventListener("loadedmetadata", enforce);
+  v.addEventListener("play", enforce);
+  v.addEventListener("playing", enforce);
+  // pas de menu contextuel (empêche d'afficher les contrôles natifs)
+  v.addEventListener("contextmenu", (e) => e.preventDefault());
+  // pas de picture-in-picture (sa fenêtre expose un réglage de volume)
+  v.addEventListener("enterpictureinpicture", () => {
+    if (document.exitPictureInPicture) document.exitPictureInPicture().catch(() => {});
+  });
+  // si l'attribut controls ou muted est modifié depuis l'inspecteur / un script
+  if (typeof MutationObserver === "function") {
+    new MutationObserver(enforce).observe(v, {
+      attributes: true,
+      attributeFilter: ["controls", "muted"],
+    });
+  }
+}
+
 /* ─────────────── Initialisation ─────────────── */
 
+lockVideoSound();
 loadFresques();
 renderOutro();
 layoutOutro();
