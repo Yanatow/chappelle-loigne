@@ -16,6 +16,7 @@ const screens = {
   intro: document.getElementById("screen-intro"),
   gallery: document.getElementById("screen-gallery"),
   detail: document.getElementById("screen-detail"),
+  outro: document.getElementById("screen-outro"),
 };
 let currentScreen = "home";
 
@@ -252,6 +253,7 @@ window.addEventListener("resize", () => {
   clearTimeout(mosaicResizeTimer);
   mosaicResizeTimer = setTimeout(() => {
     layoutMosaic();
+    if (typeof layoutOutro === "function") layoutOutro();
     if (isLightboxOpen()) fitLightboxImage();
   }, 120);
 });
@@ -339,6 +341,143 @@ lightbox.addEventListener("click", (e) => {
   if (e.target === lightbox || e.target.classList.contains("lightbox-figure"))
     closeLightbox();
 });
+
+/* ─────────────── Écran de clôture ─────────────── */
+
+/* Contenu déclaré dans data.js (outro) : deux photos et la prière.
+   Rendu une seule fois au chargement ; showOutro() ne fait qu'afficher. */
+const OUTRO =
+  typeof FRESQUES_DATA === "object" &&
+  FRESQUES_DATA !== null &&
+  FRESQUES_DATA.outro &&
+  typeof FRESQUES_DATA.outro === "object"
+    ? FRESQUES_DATA.outro
+    : null;
+
+function hasOutro() {
+  return OUTRO !== null;
+}
+
+function renderOutro() {
+  if (!hasOutro()) return;
+  document.getElementById("outro-title").textContent = OUTRO.titre || "";
+  document.getElementById("outro-subtitle").textContent =
+    OUTRO.sousTitre || "";
+
+  const imagesEl = document.getElementById("outro-images");
+  imagesEl.innerHTML = "";
+  (OUTRO.images || []).forEach((entry) => {
+    const { src, legende } =
+      typeof entry === "string" ? { src: entry, legende: "" } : entry;
+    const fig = document.createElement("figure");
+    fig.className = "detail-figure";
+    const img = document.createElement("img");
+    img.src = src;
+    img.alt = legende || "";
+    img.decoding = "async";
+    img.addEventListener("load", layoutOutro, { once: true });
+    fig.appendChild(img);
+    if (legende) {
+      const cap = document.createElement("figcaption");
+      cap.textContent = legende;
+      fig.appendChild(cap);
+    }
+    imagesEl.appendChild(fig);
+  });
+
+  const textEl = document.getElementById("outro-text");
+  textEl.innerHTML = "";
+  if (OUTRO.titreTexte) {
+    const h = document.createElement("h3");
+    h.textContent = OUTRO.titreTexte;
+    textEl.appendChild(h);
+  }
+  const cols = document.createElement("div");
+  cols.className = "outro-columns";
+  const paragraphs = Array.isArray(OUTRO.texte)
+    ? OUTRO.texte
+    : String(OUTRO.texte || "").split(/\n\s*\n/);
+  paragraphs.forEach((t) => {
+    const para = document.createElement("p");
+    para.textContent = t;
+    cols.appendChild(para);
+  });
+  textEl.appendChild(cols);
+  if (OUTRO.signature) {
+    const sig = document.createElement("p");
+    sig.className = "outro-signature";
+    sig.textContent = OUTRO.signature;
+    textEl.appendChild(sig);
+  }
+}
+
+/* Dimensionne les deux portraits : même hauteur (celle de la zone,
+   légende déduite), largeur suivant le ratio de chaque photo, le tout
+   réduit si nécessaire pour tenir dans la largeur. Les figures prennent
+   ainsi exactement la place des photos et restent serrées au centre. */
+function layoutOutro() {
+  const row = document.getElementById("outro-images");
+  if (!row) return;
+  const figs = Array.from(row.children);
+  if (!figs.length) return;
+
+  // petit écran : les photos s'empilent, le CSS suffit
+  if (getComputedStyle(row).flexDirection === "column") {
+    figs.forEach((fig) => {
+      fig.style.width = "";
+      const img = fig.querySelector("img");
+      if (img) {
+        img.style.width = "";
+        img.style.height = "";
+      }
+    });
+    return;
+  }
+
+  const gap = parseFloat(getComputedStyle(row).gap) || 16;
+  const W = row.clientWidth;
+  const H = row.clientHeight;
+  if (W <= 0 || H <= 0) return;
+
+  const specs = figs.map((fig) => {
+    const img = fig.querySelector("img");
+    const cap = fig.querySelector("figcaption");
+    const capH = cap
+      ? cap.offsetHeight + parseFloat(getComputedStyle(cap).marginTop)
+      : 0;
+    const ratio =
+      img && img.naturalWidth && img.naturalHeight
+        ? img.naturalWidth / img.naturalHeight
+        : 0.72;
+    return { img, capH, ratio };
+  });
+
+  // hauteur commune des photos, puis largeur totale à cette hauteur
+  const imgH = H - Math.max(...specs.map((s) => s.capH));
+  const total =
+    specs.reduce((sum, s) => sum + s.ratio * imgH, 0) + gap * (figs.length - 1);
+  const scale = total > W ? (W - gap * (figs.length - 1)) / (total - gap * (figs.length - 1)) : 1;
+
+  specs.forEach((s, i) => {
+    if (!s.img) return;
+    const h = Math.floor(imgH * scale);
+    const w = Math.floor(s.ratio * h);
+    s.img.style.height = `${h}px`;
+    s.img.style.width = `${w}px`;
+    figs[i].style.width = `${w}px`;
+  });
+}
+
+function showOutro() {
+  if (!hasOutro()) return;
+  document.getElementById("outro-text").scrollTop = 0;
+  if (currentScreen !== "outro") {
+    showScreen("outro");
+    // sur petit écran la section était masquée : dimensions connues
+    // seulement une fois affichée
+    requestAnimationFrame(layoutOutro);
+  } else clearFocus();
+}
 
 /* ─────────────── Galerie & window component ─────────────── */
 
@@ -433,11 +572,15 @@ function openDetail(side, index) {
 
 /* Parcours linéaire du site :
    accueil → intro 1 → intro 2 → intro 3 → galerie (nord) → nord 1 … nord N
-           → galerie (sud) → sud 1 … sud M (fin).
+           → galerie (sud) → sud 1 … sud M → clôture (fin).
    Utilisé par les boutons ← / → du détail et par le clavier. */
 
+/* Dernière étape du parcours : la dernière fresque sud s'il n'y a
+   pas d'écran de clôture (sinon celui-ci prend le relais) */
 function isLastFresque(side, index) {
-  return side === "sud" && index === FRESQUES.sud.length - 1;
+  return (
+    !hasOutro() && side === "sud" && index === FRESQUES.sud.length - 1
+  );
 }
 
 function showGallery(side) {
@@ -463,7 +606,8 @@ function goForward() {
   if (index + 1 < FRESQUES[side].length) return openDetail(side, index + 1);
   // dernière fresque nord : retour à la galerie, versant sud sélectionné
   if (side === "nord") return showGallery("sud");
-  // dernière fresque sud : fin du parcours
+  // dernière fresque sud : écran de clôture, puis fin du parcours
+  if (currentScreen === "detail") return showOutro();
 }
 
 function goBackward() {
@@ -483,6 +627,11 @@ function goBackward() {
     if (index > 0) return openDetail(side, index - 1);
     // première fresque d'un versant : retour à la galerie de ce versant
     return showGallery(side);
+  }
+  if (currentScreen === "outro") {
+    // clôture : retour à la dernière fresque sud
+    if (FRESQUES.sud.length) return openDetail("sud", FRESQUES.sud.length - 1);
+    return showGallery("sud");
   }
   // accueil : début du parcours
 }
@@ -505,6 +654,10 @@ document
   .addEventListener("click", () => showScreen("gallery"));
 document.getElementById("btn-next").addEventListener("click", goForward);
 document.getElementById("btn-prev").addEventListener("click", goBackward);
+document
+  .getElementById("btn-outro-home")
+  .addEventListener("click", () => showScreen("home"));
+document.getElementById("btn-outro-prev").addEventListener("click", goBackward);
 document
   .querySelectorAll(".segmented-btn")
   .forEach((btn) =>
@@ -539,6 +692,7 @@ document.addEventListener("keydown", (e) => {
   if (e.key === "Escape" || e.key === "Backspace") {
     e.preventDefault();
     if (currentScreen === "detail") showScreen("gallery");
+    else if (currentScreen === "outro") showGallery("sud");
     else if (currentScreen === "gallery") showIntro(introPartCount() - 1);
     else if (currentScreen === "intro") showScreen("home");
     return;
@@ -556,6 +710,8 @@ document.addEventListener("keydown", (e) => {
 /* ─────────────── Initialisation ─────────────── */
 
 loadFresques();
+renderOutro();
+layoutOutro();
 // prépare la première partie de l'introduction (titre, mosaïque) sans l'afficher
 if (introPartCount()) {
   const first = INTRO_PARTS[0];

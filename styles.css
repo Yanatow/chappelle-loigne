@@ -1131,6 +1131,179 @@ body::before {
   color: var(--ink-soft);
 }
 
+/* ═══════════════ ÉCRAN CLÔTURE ═══════════════ */
+
+#screen-outro {
+  justify-content: flex-start;
+}
+
+/* Même en-tête que l'écran détail, mais le titre est centré par
+   rapport à la page entière (les photos le sont aussi) */
+.outro-header {
+  grid-template-columns: 1fr auto 1fr;
+}
+.outro-header .detail-heading {
+  grid-column: 2;
+}
+
+/* Corps : photos en haut (prennent la place restante), parchemin en bas */
+.outro-body {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1rem, 2.4vmin, 2.2rem);
+  width: 100%;
+  max-width: 1700px;
+  flex: 1;
+  min-height: 0;
+  padding: 2.5vmin 0 0.5vmin;
+}
+
+/* Diptyque entrouvert : les deux portraits se font face en 3D */
+.outro-images {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  gap: clamp(1.2rem, 3vmin, 3rem);
+  perspective: 1600px;
+}
+
+/* largeur fixée par layoutOutro() (script.js) : celle de la photo */
+.outro-images .detail-figure {
+  flex: 0 0 auto;
+  max-width: 48%;
+}
+.outro-images .detail-figure:nth-child(1) {
+  transform: rotateY(6deg);
+  transform-origin: right center;
+}
+.outro-images .detail-figure:nth-child(2) {
+  transform: rotateY(-6deg);
+  transform-origin: left center;
+}
+
+/* portraits : hauteur et largeur posées par layoutOutro() */
+.outro-images .detail-figure img {
+  flex: none;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+  align-self: center;
+}
+
+/* Parchemin en pied de page : jamais plus de la moitié de l'écran,
+   le texte défile à l'intérieur si nécessaire */
+.outro-parchment-wrap {
+  flex: 0 1 auto;
+  min-height: 0;
+  max-height: 50vh;
+  display: flex;
+  flex-direction: column;
+  transform: rotate(0.3deg);
+}
+
+.outro-parchment-wrap .parchment-sheet {
+  height: auto;
+  flex: 0 1 auto;
+  padding: clamp(1.4rem, 3vmin, 2.4rem) clamp(2rem, 4vmin, 3.6rem);
+}
+
+.outro-text {
+  flex: 0 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #8a5a2e transparent;
+}
+.outro-text::-webkit-scrollbar {
+  width: 6px;
+}
+.outro-text::-webkit-scrollbar-thumb {
+  background: #8a5a2e;
+  border-radius: 999px;
+}
+
+/* La prière se lit sur deux colonnes, comme un feuillet imprimé */
+.outro-columns {
+  columns: 2;
+  column-gap: clamp(2rem, 4vmin, 4rem);
+  column-rule: 1px solid rgba(96, 64, 30, 0.25);
+}
+
+.outro-text h3 {
+  column-span: all;
+  margin: 0 0 0.8em;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(1.05rem, 1.6vw, 1.45rem);
+  color: #6e2318;
+  text-align: center;
+  letter-spacing: 0.04em;
+}
+
+.outro-text p {
+  flex: none;
+  overflow: visible;
+  margin: 0 0 0.7em;
+  font-family: "Gotique", var(--font-body);
+  font-size: clamp(1rem, 1.35vw, 1.3rem);
+  line-height: 1.45;
+  letter-spacing: 0.08em;
+  word-spacing: 0.12em;
+  color: #3b2716;
+  text-align: left;
+}
+
+/* lettrine uniquement sur le premier paragraphe */
+.outro-text p::first-letter {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+.outro-text .outro-columns p:first-of-type::first-letter {
+  font-family: var(--font-display);
+  font-size: 1.55em;
+  color: #6e2318;
+}
+
+/* légende sur une ligne, centrée sous la photo même si plus large */
+.outro-images .detail-figure figcaption {
+  white-space: nowrap;
+  width: max-content;
+  align-self: center;
+}
+
+/* écran peu haut : texte du parchemin plus compact */
+@media (max-height: 820px) {
+  .outro-parchment-wrap .parchment-sheet {
+    padding: clamp(1rem, 2.4vmin, 1.8rem) clamp(1.6rem, 3.5vmin, 3rem);
+  }
+  .outro-text h3 {
+    font-size: 1rem;
+    margin-bottom: 0.5em;
+  }
+  .outro-text p {
+    font-size: 0.95rem;
+    line-height: 1.35;
+    margin-bottom: 0.5em;
+  }
+  .outro-text .outro-signature {
+    font-size: 0.95rem;
+  }
+}
+
+.outro-text .outro-signature {
+  column-span: all;
+  margin: 0.4em 0 0;
+  font-family: var(--font-body);
+  font-style: italic;
+  font-size: clamp(1rem, 1.4vw, 1.3rem);
+  letter-spacing: 0.02em;
+  text-align: right;
+  color: #5a3a1e;
+}
+
 /* ─────────────── Petits écrans (fallback) ─────────────── */
 
 @media (max-width: 820px) {
@@ -1183,5 +1356,29 @@ body::before {
   }
   .detail-images > * {
     transform: none !important;
+  }
+  .outro-header {
+    grid-template-columns: 1fr;
+  }
+  .outro-header .detail-heading {
+    grid-column: auto;
+  }
+  .outro-images {
+    flex-direction: column;
+    align-items: center;
+  }
+  .outro-images .detail-figure {
+    max-width: 100%;
+    transform: none !important;
+  }
+  .outro-images .detail-figure img {
+    width: auto;
+    max-height: 60vh;
+  }
+  .outro-parchment-wrap {
+    max-height: none;
+  }
+  .outro-columns {
+    columns: 1;
   }
 }

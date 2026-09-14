@@ -128,6 +128,33 @@
     </div>
   </section>
 
+  <!-- ═══════════════ ÉCRAN 5 · CLÔTURE ═══════════════
+       Après la dernière fresque du versant sud (data.js → outro) :
+       deux photos au centre, la prière sur un parchemin en dessous -->
+  <section id="screen-outro" class="screen" aria-label="Clôture">
+    <header class="detail-header outro-header">
+      <button id="btn-outro-home" class="btn btn-secondary" type="button">✠&nbsp; Accueil</button>
+      <div class="detail-heading">
+        <h2 class="detail-title" id="outro-title"></h2>
+        <p class="detail-subtitle" id="outro-subtitle"></p>
+      </div>
+      <div class="detail-nav">
+        <button id="btn-outro-prev" class="btn btn-primary btn-arrow" type="button" aria-label="Fresque précédente">←</button>
+        <span class="detail-counter">Fin</span>
+        <button class="btn btn-primary btn-arrow" type="button" aria-label="Fin du parcours" disabled>→</button>
+      </div>
+    </header>
+
+    <div class="outro-body">
+      <div class="outro-images" id="outro-images"></div>
+      <div class="parchment-sheet-wrap outro-parchment-wrap">
+        <div class="parchment-sheet">
+          <div class="outro-text" id="outro-text"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <script src="data.js"></script>
   <script src="script.js"></script>
 </body>

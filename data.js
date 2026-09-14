@@ -17,6 +17,15 @@
                 côte à côte, toujours sur la même ligne
    Au clic, une photo de la mosaïque s ouvre en grand (fenêtre
    refermable par ✕, Échap ou un clic à côté).
+   L écran de clôture (après la dernière fresque du versant sud) se
+   gère dans l objet « outro » :
+     titre      titre affiché en haut de l écran
+     sousTitre  sous-titre sous le titre
+     images     les deux photos affichées côte à côte, chacune avec
+                { src, legende } (legende affichée sous la photo)
+     titreTexte titre en tête du parchemin
+     texte      paragraphes du parchemin, dans l ordre
+     signature  ligne finale, en italique, alignée à droite
    L ordre des entrées est l ordre d affichage. Ce fichier est du
    JSON enrobé d une affectation JavaScript, pour fonctionner sans
    serveur HTTP (ouverture d index.html par double-clic).
@@ -366,4 +375,21 @@ const FRESQUES_DATA = {
         "Job est dévêtu, assis sur un tas de fumier ; au-dessus de lui, le démon le frappe de la lèpre, et à sa droite sa femme lui parle. Patriarche étranger à Israël, Job est le type du juste : « intègre, droit, craignant Dieu et éloigné du mal ». Privé de tous ses biens puis frappé dans sa chair, il ne maudit pas Dieu — son amour est sans calcul : « Nous recevons le bien de Dieu, et nous ne recevrions pas aussi le mal ? »",
     },
   ],
+
+  outro: {
+    titre: "Prière des pèlerins",
+    sousTitre: "Chapelle du Viaulnay · Notre-Dame de Pitié",
+    images: [{ src: "outro/jeanne2.jpg" }, { src: "outro/jeanne.jpeg" }],
+    titreTexte:
+      "Prière des pèlerins de la chapelle du Viaulnay à Notre-Dame de Pitié",
+    texte: [
+      "Dans cette chapelle du Viaulnay, nous vous prions, Notre-Dame de Pitié.",
+      "Ô notre Mère, ô Mère du Verbe incarné, vos larmes ne cessent de couler sur les plaies du corps de votre Fils blessé. Vous qui avez souffert Sept Douleurs qui chacune, comme une épée, ont transpercé votre Cœur Immaculé, vous, la Vierge très compatissante, tournez vers nous votre regard plein de pitié. Prenez soin de nos blessures, suppléez par vos grâces à nos fragilités, et portez vous-même à Jésus, votre Enfant bien aimé, les prières que nous sommes venus vous confier. Mais surtout, Mère tout éplorée, apprenez nous à aimer Dieu dans nos croix d’ici bas, comme vous l’avez fait jusqu’aux pieds de votre Fils crucifié pour nous, jusqu’au tombeau du Sauveur de l’Humanité. Apprenez nous à Le remercier, à Lui faire confiance, en tout, pour tout, sans retour. Apprenez nous à nous abandonner à Son Cœur Sacré.",
+      "Que par votre puissante intercession, Notre Seigneur nous accorde la grâce de faire seulement Sa Volonté, dans toutes nos épreuves et difficultés. Que par Sa Croix et par vos larmes, nous soyons tous sauvés.",
+      "Merci, ô miséricordieuse Vierge Marie, car déjà nous nous savons exaucés.",
+      "Amen.",
+    ],
+    signature:
+      "Sœur Jeanne, Ordre de la Visitation Sainte-Marie (Jeanne Pelat)",
+  },
 };
