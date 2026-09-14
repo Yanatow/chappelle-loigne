@@ -8,6 +8,10 @@
      titre             titre affiché sur la card et l écran de détail
      descriptionCourte sous-titre de la card et de l écran de détail
      descriptionLongue texte du parchemin à droite des deux photos
+     son               (optionnel) commentaire audio lancé à l ouverture
+                       du détail, ex. "sound/image7.mp3". Sans ce champ
+                       la fresque est silencieuse et les boutons son sont
+                       masqués (de même si le fichier est introuvable).
    L écran d introduction (entre l accueil et la galerie) se gère
    dans le tableau « intro » : une entrée par partie, chacune avec
      titre      titre affiché en haut de l écran
@@ -87,6 +91,7 @@ const FRESQUES_DATA = {
     {
       photo: "nord/2.jpg",
       photo_restored: "nord_restored/2.mp4",
+      son: "sound/image2.mp3",
       preview_offset: 50,
       titre: "Jésus devant les autorités juives",
       descriptionCourte: "Panneau 2 · La Passion du Christ",
@@ -105,6 +110,7 @@ const FRESQUES_DATA = {
     {
       photo: "nord/4.jpg",
       photo_restored: "nord_restored/4.mp4",
+      son: "sound/image4.mp3",
       preview_offset: 10,
       titre: "Ecce Homo",
       descriptionCourte: "Panneau 4 · La Passion du Christ",
@@ -123,6 +129,7 @@ const FRESQUES_DATA = {
     {
       photo: "nord/6.jpg",
       photo_restored: "nord_restored/6.mp4",
+      son: "sound/image6.mp3",
       preview_offset: 10,
       titre: "Le prophète Isaïe",
       descriptionCourte: "Panneau 6 · L'annonce de la croix",
@@ -159,6 +166,7 @@ const FRESQUES_DATA = {
     {
       photo: "nord/10.jpg",
       photo_restored: "nord_restored/10.mp4",
+      son: "sound/image10.mp3",
       preview_offset: 20,
       titre: "Saint Jean l'Évangéliste",
       descriptionCourte: "Panneau 10 · Les quatre évangélistes",
@@ -168,6 +176,7 @@ const FRESQUES_DATA = {
     {
       photo: "nord/11.jpg",
       photo_restored: "nord_restored/11.mp4",
+      son: "sound/image11.mp3",
       preview_offset: 20,
       titre: "Saint Marc",
       descriptionCourte: "Panneau 11 · Les quatre évangélistes",
@@ -177,6 +186,7 @@ const FRESQUES_DATA = {
     {
       photo: "nord/12.jpg",
       photo_restored: "nord_restored/12.mp4",
+      son: "sound/image12.mp3",
       preview_offset: 15,
       titre: "Saint Luc",
       descriptionCourte: "Panneau 12 · Les quatre évangélistes",
@@ -186,6 +196,7 @@ const FRESQUES_DATA = {
     {
       photo: "nord/13.jpg",
       photo_restored: "nord_restored/13.mp4",
+      son: "sound/image13.mp3",
       preview_offset: 25,
       titre: "Saint Matthieu",
       descriptionCourte: "Panneau 13 · Les quatre évangélistes",
@@ -195,6 +206,7 @@ const FRESQUES_DATA = {
     {
       photo: "nord/14.jpg",
       photo_restored: "nord_restored/14.mp4",
+      son: "sound/image14.mp3",
       preview_offset: 25,
       titre: "Saint Grégoire",
       descriptionCourte: "Panneau 14 · Pères de l'Église latine",
@@ -204,6 +216,7 @@ const FRESQUES_DATA = {
     {
       photo: "nord/15.jpg",
       photo_restored: "nord_restored/15.mp4",
+      son: "sound/image15.mp3",
       preview_offset: 30,
       titre: "Saint Augustin",
       descriptionCourte: "Panneau 15 · Pères de l'Église latine",
@@ -213,6 +226,7 @@ const FRESQUES_DATA = {
     {
       photo: "nord/16.jpg",
       photo_restored: "nord_restored/16.mp4",
+      son: "sound/image16.mp3",
       preview_offset: 30,
       titre: "Saint Ambroise",
       descriptionCourte: "Panneau 16 · Pères de l'Église latine",
@@ -222,6 +236,7 @@ const FRESQUES_DATA = {
     {
       photo: "nord/17.jpg",
       photo_restored: "nord_restored/17.mp4",
+      son: "sound/image17.mp3",
       preview_offset: 30,
       titre: "Saint Jérôme",
       descriptionCourte: "Panneau 17 · Pères de l'Église latine",
@@ -231,6 +246,7 @@ const FRESQUES_DATA = {
     {
       photo: "nord/18.jpg",
       photo_restored: "nord_restored/18.mp4",
+      son: "sound/image18.mp3",
       preview_offset: 10,
       titre: "Saint Paul",
       descriptionCourte: "Panneau 18 · L'apôtre des nations",

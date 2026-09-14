@@ -31,10 +31,11 @@ function showScreen(name) {
   currentScreen = name;
   clearFocus();
   if (typeof closeLightbox === "function" && name !== "intro") closeLightbox();
-  // stoppe la vidéo de restitution quand on quitte l'écran de détail
+  // stoppe la vidéo de restitution et le son quand on quitte le détail
   if (name !== "detail") {
     const v = document.getElementById("detail-video-right");
     if (v && !v.paused) v.pause();
+    if (typeof stopFresqueSound === "function") stopFresqueSound();
   }
   Object.entries(screens).forEach(([key, el]) =>
     el.classList.toggle("is-active", key === name),
@@ -566,9 +567,102 @@ function openDetail(side, index) {
     right.alt = `${f.titre} — restitution`;
   }
 
+  playFresqueSound(f);
+
   if (currentScreen !== "detail") showScreen("detail");
   else clearFocus();
 }
+
+/* ─────────────── Son des fresques ─────────────── */
+
+/* Chaque fresque peut avoir un commentaire audio, lancé automatiquement
+   à l'ouverture de son écran de détail. Le fichier est déclaré dans
+   data.js (champ `son`) ; sans ce champ, la fresque est silencieuse et
+   les commandes sont masquées (de même si le fichier est introuvable).
+   L'état coupé / rallumé est commun à toutes les fresques et retenu
+   d'une visite à l'autre. */
+
+const detailAudio = document.getElementById("detail-audio");
+const soundControls = document.getElementById("detail-sound");
+const replayBtn = document.getElementById("btn-sound-replay");
+const muteBtn = document.getElementById("btn-sound-mute");
+const MUTE_STORAGE_KEY = "viaulnay-son-coupe";
+
+let soundMuted = false;
+try {
+  soundMuted = localStorage.getItem(MUTE_STORAGE_KEY) === "1";
+} catch (_) {
+  /* stockage indisponible : le son reste allumé */
+}
+
+function fresqueSound(f) {
+  return typeof f.son === "string" && f.son ? f.son : null;
+}
+
+function playFresqueSound(f) {
+  const src = fresqueSound(f);
+  soundControls.hidden = !src;
+  soundControls.classList.remove("is-playing");
+  if (!src) return stopFresqueSound();
+  detailAudio.muted = soundMuted;
+  detailAudio.src = src;
+  detailAudio.currentTime = 0;
+  // la lecture peut être refusée tant que l'utilisateur n'a pas interagi
+  // avec la page : le bouton « rejouer » permet alors de la lancer
+  detailAudio.play().catch(() => {});
+}
+
+function replayFresqueSound() {
+  if (!detailAudio.getAttribute("src")) return;
+  detailAudio.currentTime = 0;
+  detailAudio.play().catch(() => {});
+  clearFocus();
+}
+
+function stopFresqueSound() {
+  if (!detailAudio.paused) detailAudio.pause();
+  detailAudio.removeAttribute("src");
+  soundControls.classList.remove("is-playing");
+}
+
+function updateMuteButton() {
+  muteBtn.classList.toggle("is-muted", soundMuted);
+  muteBtn.setAttribute("aria-pressed", String(soundMuted));
+  const label = soundMuted ? "Rallumer le son" : "Couper le son";
+  muteBtn.setAttribute("aria-label", label);
+  muteBtn.title = label;
+}
+
+function toggleMute() {
+  soundMuted = !soundMuted;
+  detailAudio.muted = soundMuted;
+  try {
+    localStorage.setItem(MUTE_STORAGE_KEY, soundMuted ? "1" : "0");
+  } catch (_) {
+    /* stockage indisponible : l'état ne vaut que pour cette visite */
+  }
+  updateMuteButton();
+  // rallumé alors que le commentaire est déjà terminé : on le rejoue
+  if (!soundMuted && detailAudio.ended) replayFresqueSound();
+  clearFocus();
+}
+
+replayBtn.addEventListener("click", replayFresqueSound);
+muteBtn.addEventListener("click", toggleMute);
+detailAudio.addEventListener("play", () =>
+  soundControls.classList.add("is-playing"),
+);
+["pause", "ended"].forEach((evt) =>
+  detailAudio.addEventListener(evt, () =>
+    soundControls.classList.remove("is-playing"),
+  ),
+);
+// fichier absent ou illisible : pas de commandes pour cette fresque
+detailAudio.addEventListener("error", () => {
+  soundControls.hidden = true;
+  soundControls.classList.remove("is-playing");
+});
+updateMuteButton();
 
 /* Parcours linéaire du site :
    accueil → intro 1 → intro 2 → intro 3 → galerie (nord) → nord 1 … nord N

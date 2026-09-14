@@ -942,13 +942,76 @@ body::before {
   gap: clamp(1rem, 2.4vmin, 2.2rem);
 }
 
-.detail-header .btn-secondary {
+/* Coin gauche de l'en-tête : bouton Retour, puis commandes du son */
+.detail-header .detail-left {
   position: absolute;
   left: 0;
   top: 50%;
   transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  gap: clamp(0.6rem, 1.4vmin, 1.1rem);
+}
+
+.detail-header .btn-secondary {
   font-size: clamp(0.75rem, 1vw, 0.9rem);
   padding: 0.75em 1.6em;
+}
+
+/* ─── Commandes du son : rejouer / couper-rallumer ─── */
+
+.detail-sound {
+  display: flex;
+  align-items: center;
+  gap: clamp(0.4rem, 1vmin, 0.7rem);
+  /* séparées du bouton Retour par un fin trait doré */
+  padding-left: clamp(0.6rem, 1.4vmin, 1.1rem);
+  border-left: 1px solid var(--border);
+}
+
+.detail-sound[hidden] {
+  display: none;
+}
+
+.detail-sound .btn-icon {
+  width: 2.7em;
+  height: 2.7em;
+  padding: 0;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  letter-spacing: 0;
+}
+
+.btn-icon svg {
+  width: 52%;
+  height: 52%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* haut-parleur doré et lumineux tant que le son joue */
+.detail-sound.is-playing .btn-sound-mute {
+  color: var(--gold-pale);
+  border-color: var(--gold);
+  box-shadow: var(--glow);
+}
+
+/* son coupé : les ondes laissent place à une croix */
+.sound-cross {
+  display: none;
+}
+
+.btn-sound-mute.is-muted .sound-wave {
+  display: none;
+}
+
+.btn-sound-mute.is-muted .sound-cross {
+  display: block;
 }
 
 .detail-heading {
@@ -1417,11 +1480,11 @@ body::before {
   .detail-header .detail-nav {
     grid-column: auto;
   }
-  .detail-header .btn-secondary {
+  .detail-header .detail-left {
     position: static;
     transform: none;
+    justify-self: center;
   }
-  .detail-header .btn-secondary,
   .detail-nav {
     justify-self: center;
   }
