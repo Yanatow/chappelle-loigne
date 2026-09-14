@@ -338,6 +338,77 @@ body::before {
   border-radius: 8px;
 }
 
+/* ─────────────── Plein écran : triangle dans le coin haut-gauche ─────────────── */
+
+.fullscreen-toggle {
+  --fs-size: clamp(56px, 6vmin, 84px);
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 60; /* au-dessus du lightbox (50) : visible sur tous les écrans */
+  width: var(--fs-size);
+  height: var(--fs-size);
+  padding: 0;
+  border: 0;
+  cursor: pointer;
+  /* triangle rectangle collé aux deux rebords du navigateur */
+  clip-path: polygon(0 0, 100% 0, 0 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(217, 164, 65, 0.55),
+    rgba(217, 164, 65, 0.1) 70%
+  );
+  color: var(--nave);
+  opacity: 0.45;
+  transition:
+    opacity 220ms ease,
+    background 220ms ease;
+}
+
+.fullscreen-toggle:hover,
+.fullscreen-toggle:focus-visible {
+  opacity: 1;
+  background: linear-gradient(135deg, var(--gold-pale), var(--gold) 70%);
+}
+
+/* Le contour de focus habituel serait rogné par le clip-path :
+   on le remplace par un léger éclaircissement */
+.fullscreen-toggle:focus-visible {
+  outline: none;
+}
+
+.fullscreen-icon {
+  position: absolute;
+  /* centre de gravité du triangle : à un tiers de chaque bord */
+  top: calc(var(--fs-size) / 3);
+  left: calc(var(--fs-size) / 3);
+  width: calc(var(--fs-size) * 0.3);
+  height: calc(var(--fs-size) * 0.3);
+  transform: translate(-60%, -60%);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.fullscreen-icon-exit {
+  display: none;
+}
+
+.fullscreen-toggle.is-fullscreen .fullscreen-icon-enter {
+  display: none;
+}
+
+.fullscreen-toggle.is-fullscreen .fullscreen-icon-exit {
+  display: block;
+}
+
+/* Le navigateur n'autorise pas le plein écran (iframe, ancien appareil) */
+.fullscreen-toggle[hidden] {
+  display: none;
+}
+
 /* ═══════════════ ÉCRAN ACCUEIL ═══════════════ */
 
 .home-frame {
@@ -970,12 +1041,12 @@ body::before {
     /* deux plis horizontaux à peine visibles : ombre fine puis rehaut,
        comme une lettre qui fut pliée en trois */
     linear-gradient(
-      179deg,
-      transparent 32%,
-      rgba(96, 64, 30, 0.025) 32.6%,
-      rgba(255, 248, 225, 0.055) 33.4%,
-      transparent 34.2%
-    ),
+        179deg,
+        transparent 32%,
+        rgba(96, 64, 30, 0.025) 32.6%,
+        rgba(255, 248, 225, 0.055) 33.4%,
+        transparent 34.2%
+      ),
     linear-gradient(
       181deg,
       transparent 65.5%,

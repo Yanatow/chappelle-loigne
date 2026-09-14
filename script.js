@@ -707,6 +707,53 @@ document.addEventListener("keydown", (e) => {
   }
 });
 
+/* ─────────────── Plein écran ─────────────── */
+
+const fullscreenBtn = document.getElementById("btn-fullscreen");
+
+function fullscreenElement() {
+  return document.fullscreenElement || document.webkitFullscreenElement || null;
+}
+
+function fullscreenEnabled() {
+  return Boolean(
+    document.fullscreenEnabled || document.webkitFullscreenEnabled
+  );
+}
+
+function enterFullscreen() {
+  const root = document.documentElement;
+  const request = root.requestFullscreen || root.webkitRequestFullscreen;
+  if (request) request.call(root);
+}
+
+function exitFullscreen() {
+  const exit = document.exitFullscreen || document.webkitExitFullscreen;
+  if (exit) exit.call(document);
+}
+
+function toggleFullscreen() {
+  if (fullscreenElement()) exitFullscreen();
+  else enterFullscreen();
+}
+
+function updateFullscreenButton() {
+  const active = Boolean(fullscreenElement());
+  fullscreenBtn.classList.toggle("is-fullscreen", active);
+  const label = active ? "Quitter le plein écran" : "Passer en plein écran";
+  fullscreenBtn.setAttribute("aria-label", label);
+  fullscreenBtn.title = label;
+}
+
+if (fullscreenEnabled()) {
+  fullscreenBtn.addEventListener("click", toggleFullscreen);
+  document.addEventListener("fullscreenchange", updateFullscreenButton);
+  document.addEventListener("webkitfullscreenchange", updateFullscreenButton);
+  updateFullscreenButton();
+} else {
+  fullscreenBtn.hidden = true;
+}
+
 /* ─────────────── Initialisation ─────────────── */
 
 loadFresques();
