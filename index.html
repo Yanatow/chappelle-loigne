@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chapelle du Viaulnay — Notre-Dame de Pitié</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cinzel+Decorative:wght@400;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- Texture parchemin plein écran -->
+  <div class="parchment" aria-hidden="true"></div>
+
+  <!-- ═══════════════ ÉCRAN 1 · ACCUEIL ═══════════════ -->
+  <section id="screen-home" class="screen is-active" aria-label="Accueil">
+    <div class="home-frame">
+      <div class="ornament ornament-top" aria-hidden="true">✦ ─── ✠ ─── ✦</div>
+      <p class="eyebrow">Anno Domini · MDLX</p>
+      <h1 class="home-title">
+        Chapelle du Viaulnay<br />
+        <span class="home-title-sub">Notre-Dame de Pitié</span>
+      </h1>
+      <p class="home-place">Loigné-sur-Mayenne</p>
+      <div class="ornament ornament-mid" aria-hidden="true">❦</div>
+      <button id="btn-start" class="btn btn-primary" type="button">Démarrer</button>
+      <div class="ornament ornament-bottom" aria-hidden="true">✦ ─────────── ✦</div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ ÉCRAN 2 · INTRODUCTION ═══════════════ -->
+  <section id="screen-intro" class="screen" aria-label="Introduction">
+    <header class="gallery-header">
+      <button id="btn-intro-home" class="btn btn-ghost" type="button">✠&nbsp; Accueil</button>
+      <h2 class="gallery-title" id="intro-title">Aux origines de la chapelle</h2>
+      <span aria-hidden="true"></span>
+    </header>
+
+    <div class="intro-layout">
+      <div class="parchment-sheet-wrap intro-parchment-wrap">
+        <div class="parchment-sheet">
+          <p id="intro-text"></p>
+        </div>
+      </div>
+      <figure class="detail-figure intro-figure">
+        <img
+          id="intro-img"
+          src=""
+          alt=""
+          onerror="this.hidden=true;this.closest('figure').classList.add('is-empty')"
+        />
+        <figcaption id="intro-caption"></figcaption>
+      </figure>
+    </div>
+
+    <button id="btn-intro-continue" class="btn btn-primary" type="button">
+      Découvrir les fresques
+    </button>
+  </section>
+
+  <!-- ═══════════════ ÉCRAN 3 · GALERIE ═══════════════ -->
+  <section id="screen-gallery" class="screen" aria-label="Liste des fresques">
+    <header class="gallery-header">
+      <button id="btn-home" class="btn btn-ghost" type="button">✠&nbsp; Accueil</button>
+      <h2 class="gallery-title">Les fresques de la chapelle</h2>
+
+      <!-- Window component : bascule Versant Nord / Versant Sud -->
+      <div class="segmented" role="tablist" aria-label="Choix du versant">
+        <span class="segmented-thumb" aria-hidden="true"></span>
+        <button class="segmented-btn is-active" type="button" role="tab" aria-selected="true" data-side="nord">
+          Versant Nord
+        </button>
+        <button class="segmented-btn" type="button" role="tab" aria-selected="false" data-side="sud">
+          Versant Sud
+        </button>
+      </div>
+    </header>
+
+    <div class="slider-viewport">
+      <div class="slider-track" id="slider-track">
+        <div class="slider-panel" role="tabpanel" aria-label="Fresques du versant nord">
+          <div class="card-grid" id="grid-nord"></div>
+        </div>
+        <div class="slider-panel" role="tabpanel" aria-label="Fresques du versant sud">
+          <div class="card-grid" id="grid-sud"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ ÉCRAN 4 · DÉTAIL ═══════════════ -->
+  <section id="screen-detail" class="screen" aria-label="Détail d'une fresque">
+    <header class="detail-header">
+      <button id="btn-back" class="btn btn-secondary" type="button">✠&nbsp; Retour</button>
+      <div class="detail-heading">
+        <h2 class="detail-title" id="detail-title">Titre de la fresque</h2>
+        <p class="detail-subtitle" id="detail-subtitle"></p>
+      </div>
+      <div class="detail-nav">
+        <button id="btn-prev" class="btn btn-primary btn-arrow" type="button" aria-label="Fresque précédente">←</button>
+        <span class="detail-counter" id="detail-counter"></span>
+        <button id="btn-next" class="btn btn-primary btn-arrow" type="button" aria-label="Fresque suivante">→</button>
+      </div>
+    </header>
+
+    <div class="detail-images">
+      <figure class="detail-figure">
+        <img id="detail-img-left" src="" alt="" />
+        <figcaption>État actuel</figcaption>
+      </figure>
+      <figure class="detail-figure">
+        <img id="detail-img-right" src="" alt="" />
+        <video id="detail-video-right" muted loop playsinline hidden></video>
+        <figcaption>Restitution</figcaption>
+      </figure>
+      <div class="parchment-sheet-wrap detail-parchment-wrap">
+        <div class="parchment-sheet">
+          <p id="detail-description"></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script src="data.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

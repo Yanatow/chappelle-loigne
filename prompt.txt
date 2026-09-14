@@ -1,0 +1,13 @@
+Image : 
+Voici une scène extraite d'une fresque provenant d'une chappelle de 1560.
+Je souhaite la recolorer aux couleurs d'époque. Il faut que l'image recolorisé ressemble au maximum à l'image d'origine que je te passe en entré. Les traits de dessins perceptibles doivent être repris au maximum.
+Le focus doit être mis sur l'image centrale (encadré par du bois et non les éléments perceptibles autour. 
+
+Il s'agit de "Jésus au Jardin des Oliviers"
+
+
+Video :
+
+Voici une scène extraite d'une fresque provenant d'une chappelle de 1560.
+Je souhaite l'animer pour rendre la scène plus vivante. Le focus doit être gardé sur l'image de base, je ne veux pas de traveling de camera sur d'autres éléments. Seul l'image recolorisé doit être animé  
+Il s'agit de "Jésus devant les autorités juives. Certains d’entre les chefs juifs décident de la condamner car son enseignement est considéré comme dangereux et surtout Jésus se dit Dieu ce qui est inaudible pour eux. Ensuite"
