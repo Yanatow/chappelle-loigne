@@ -30,7 +30,12 @@ function clearFocus() {
 function showScreen(name) {
   currentScreen = name;
   clearFocus();
-  if (typeof closeLightbox === "function" && name !== "intro") closeLightbox();
+  if (
+    typeof closeLightbox === "function" &&
+    name !== "intro" &&
+    name !== "outro"
+  )
+    closeLightbox();
   // stoppe la vidéo de restitution et le son quand on quitte le détail
   if (name !== "detail") {
     const v = document.getElementById("detail-video-right");
@@ -144,7 +149,7 @@ function renderMosaic(images) {
         }),
       );
       btn.appendChild(img);
-      btn.addEventListener("click", () => openLightbox(index));
+      btn.addEventListener("click", () => openLightbox(index, introPhotos));
       tile.appendChild(btn);
     });
     mosaic.appendChild(tile);
@@ -262,6 +267,8 @@ window.addEventListener("resize", () => {
 /* ─────────────── Fenêtre d'agrandissement ─────────────── */
 
 const lightbox = document.getElementById("lightbox");
+/* série de photos parcourue par la fenêtre (intro ou clôture) */
+let lightboxPhotos = [];
 let lightboxIndex = 0;
 
 function isLightboxOpen() {
@@ -299,20 +306,23 @@ function fitLightboxImage() {
   img.style.height = "auto";
 }
 
-function openLightbox(index) {
-  if (!introPhotos.length) return;
-  lightboxIndex = Math.min(introPhotos.length - 1, Math.max(0, index));
+/* `photos` : la série à parcourir ; omis, on reste sur la série courante
+   (navigation ← / → dans la fenêtre) */
+function openLightbox(index, photos) {
+  if (Array.isArray(photos)) lightboxPhotos = photos;
+  if (!lightboxPhotos.length) return;
+  lightboxIndex = Math.min(lightboxPhotos.length - 1, Math.max(0, index));
   const img = document.getElementById("lightbox-img");
   img.style.width = "";
   img.style.height = "";
   img.onload = fitLightboxImage;
-  img.src = introPhotos[lightboxIndex];
-  img.alt = `Photo ${lightboxIndex + 1} sur ${introPhotos.length}`;
+  img.src = lightboxPhotos[lightboxIndex];
+  img.alt = `Photo ${lightboxIndex + 1} sur ${lightboxPhotos.length}`;
   document.getElementById("lightbox-counter").textContent =
-    `${lightboxIndex + 1} / ${introPhotos.length}`;
+    `${lightboxIndex + 1} / ${lightboxPhotos.length}`;
   document.getElementById("lightbox-prev").disabled = lightboxIndex === 0;
   document.getElementById("lightbox-next").disabled =
-    lightboxIndex === introPhotos.length - 1;
+    lightboxIndex === lightboxPhotos.length - 1;
   if (lightbox.hidden) {
     lightbox.hidden = false;
     // force le reflow avant d'animer l'apparition
@@ -359,6 +369,10 @@ function hasOutro() {
   return OUTRO !== null;
 }
 
+/* chemins des photos de clôture, dans l'ordre : série de la fenêtre
+   d'agrandissement (comme introPhotos pour l'introduction) */
+let outroPhotos = [];
+
 function renderOutro() {
   if (!hasOutro()) return;
   document.getElementById("outro-title").textContent = OUTRO.titre || "";
@@ -367,9 +381,12 @@ function renderOutro() {
 
   const imagesEl = document.getElementById("outro-images");
   imagesEl.innerHTML = "";
+  outroPhotos = [];
   (OUTRO.images || []).forEach((entry) => {
     const { src, legende } =
       typeof entry === "string" ? { src: entry, legende: "" } : entry;
+    const index = outroPhotos.length;
+    outroPhotos.push(src);
     const fig = document.createElement("figure");
     fig.className = "detail-figure";
     const img = document.createElement("img");
@@ -377,6 +394,22 @@ function renderOutro() {
     img.alt = legende || "";
     img.decoding = "async";
     img.addEventListener("load", layoutOutro, { once: true });
+    // la photo s'ouvre en grand, comme celles de l'introduction ;
+    // l'image reste l'élément dimensionné par layoutOutro()
+    img.className = "outro-photo";
+    img.setAttribute("role", "button");
+    img.tabIndex = 0;
+    img.setAttribute(
+      "aria-label",
+      legende ? `Agrandir : ${legende}` : `Agrandir la photo ${index + 1}`,
+    );
+    img.addEventListener("click", () => openLightbox(index, outroPhotos));
+    img.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        openLightbox(index, outroPhotos);
+      }
+    });
     fig.appendChild(img);
     if (legende) {
       const cap = document.createElement("figcaption");
@@ -385,6 +418,11 @@ function renderOutro() {
     }
     imagesEl.appendChild(fig);
   });
+
+  // légende commune aux deux photos, sous le diptyque
+  const captionEl = document.getElementById("outro-images-caption");
+  captionEl.textContent = OUTRO.legendeImages || "";
+  captionEl.hidden = !OUTRO.legendeImages;
 
   const textEl = document.getElementById("outro-text");
   textEl.innerHTML = "";

@@ -27,6 +27,7 @@
      sousTitre  sous-titre sous le titre
      images     les deux photos affichées côte à côte, chacune avec
                 { src, legende } (legende affichée sous la photo)
+     legendeImages  légende unique, centrée sous les deux photos
      titreTexte titre en tête du parchemin
      texte      paragraphes du parchemin, dans l ordre
      signature  ligne finale, en italique, alignée à droite
@@ -395,6 +396,7 @@ const FRESQUES_DATA = {
   outro: {
     titre: "Merci de votre visite",
     images: [{ src: "outro/jeanne2.jpg" }, { src: "outro/jeanne.jpeg" }],
+    legendeImages: "Sœur Janne (Jeanne Pelat)",
     titreTexte:
       "Prière des pèlerins de la chapelle du Viaulnay à Notre-Dame de Pitié",
     texte: [

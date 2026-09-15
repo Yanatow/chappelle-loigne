@@ -68,7 +68,7 @@
     </div>
   </section>
 
-  <!-- Fenêtre d'agrandissement d'une photo de l'introduction -->
+  <!-- Fenêtre d'agrandissement d'une photo (introduction et clôture) -->
   <div id="lightbox" class="lightbox" role="dialog" aria-modal="true" aria-label="Photo agrandie" hidden>
     <button id="lightbox-close" class="btn btn-secondary lightbox-close" type="button" aria-label="Fermer">✕</button>
     <button id="lightbox-prev" class="btn btn-primary btn-arrow lightbox-arrow lightbox-arrow-prev" type="button" aria-label="Photo précédente">←</button>
@@ -183,7 +183,8 @@
 
   <!-- ═══════════════ ÉCRAN 5 · CLÔTURE ═══════════════
        Après la dernière fresque du versant sud (data.js → outro) :
-       deux photos au centre, la prière sur un parchemin en dessous -->
+       deux photos au centre (chacune s'ouvre en grand, comme dans
+       l'introduction), une légende commune, la prière sur un parchemin -->
   <section id="screen-outro" class="screen" aria-label="Clôture">
     <header class="detail-header outro-header">
       <div class="detail-left">
@@ -202,6 +203,7 @@
 
     <div class="outro-body">
       <div class="outro-images" id="outro-images"></div>
+      <p class="outro-images-caption" id="outro-images-caption" hidden></p>
       <div class="parchment-sheet-wrap outro-parchment-wrap">
         <div class="parchment-sheet">
           <div class="outro-text" id="outro-text"></div>
