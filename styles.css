@@ -1259,7 +1259,7 @@ body::before {
   margin: 0;
   font-family: "Gotique", var(--font-body);
   font-size: clamp(1.1rem, 1.6vw, 1.5rem);
-  line-height: 1.5;
+  line-height: 1.3;
   letter-spacing: 0.08em;
   word-spacing: 0.12em;
   color: #3b2716;
