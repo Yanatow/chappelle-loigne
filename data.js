@@ -330,6 +330,7 @@ const FRESQUES_DATA = {
       photo: "sud/28.jpg",
       photo_restored: "sud_restored/28.mp4",
       preview_offset: 20,
+      son: "sound/image28.mp3",
       titre: "François Mauguy, le fondateur",
       descriptionCourte: "Panneau 28 · Le fondateur de la chapelle",
       descriptionLongue:
