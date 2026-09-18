@@ -767,8 +767,10 @@ detailAudio.addEventListener("error", () => {
 updateMuteButton();
 
 /* Parcours linéaire du site :
-   accueil → intro 1 → intro 2 → intro 3 → galerie (nord) → nord 1 … nord N
-           → galerie (sud) → sud 1 … sud M → clôture (fin).
+   accueil → intro 1 (mosaïque, puis chaque photo agrandie) → intro 2 → …
+           → galerie (nord) → nord 1 … nord N
+           → galerie (sud) → sud 1 … sud M
+           → clôture (page, chaque photo agrandie, puis la page ; fin).
    Utilisé par les boutons ← / → du détail et par le clavier. */
 
 /* Dernière étape du parcours : la dernière fresque sud s'il n'y a
@@ -787,7 +789,14 @@ function showGallery(side) {
 function goForward() {
   if (currentScreen === "home") return showIntro(0);
   if (currentScreen === "intro") {
-    // parties de l'introduction, puis galerie nord
+    // chaque partie : la mosaïque, puis chaque photo agrandie une à une,
+    // puis la partie suivante ; après la dernière, la galerie nord
+    if (!isLightboxOpen()) {
+      if (introPhotos.length) return openLightbox(0, introPhotos);
+    } else if (lightboxIndex + 1 < lightboxPhotos.length) {
+      return openLightbox(lightboxIndex + 1);
+    }
+    closeLightbox();
     if (state.introPart + 1 < introPartCount())
       return showIntro(state.introPart + 1);
     return showGallery("nord");
@@ -804,19 +813,44 @@ function goForward() {
   if (side === "nord") return showGallery("sud");
   // dernière fresque sud : écran de clôture, puis fin du parcours
   if (currentScreen === "detail") return showOutro();
+  if (currentScreen === "outro") {
+    // clôture : la page, puis chaque photo agrandie une à une, puis
+    // retour à la page (fenêtre refermée) : fin du parcours
+    if (!isLightboxOpen()) {
+      if (outroPhotos.length) return openLightbox(0, outroPhotos);
+    } else if (lightboxIndex + 1 < lightboxPhotos.length) {
+      return openLightbox(lightboxIndex + 1);
+    } else {
+      return closeLightbox();
+    }
+  }
+}
+
+/* Affiche une partie de l'introduction avec sa dernière photo agrandie :
+   étape atteinte en revenant en arrière depuis la partie suivante ou
+   depuis la galerie (miroir de goForward) */
+function showIntroLastPhoto(part) {
+  showIntro(part);
+  if (introPhotos.length) openLightbox(introPhotos.length - 1, introPhotos);
 }
 
 function goBackward() {
   if (currentScreen === "intro") {
-    if (state.introPart > 0) return showIntro(state.introPart - 1);
+    // photo agrandie : photo précédente, ou retour à la mosaïque
+    if (isLightboxOpen()) {
+      if (lightboxIndex > 0) return openLightbox(lightboxIndex - 1);
+      return closeLightbox();
+    }
+    // mosaïque : dernière photo de la partie précédente, ou accueil
+    if (state.introPart > 0) return showIntroLastPhoto(state.introPart - 1);
     return showScreen("home");
   }
   if (currentScreen === "gallery") {
     // galerie sud : revient à la dernière fresque nord
     if (state.side === "sud" && FRESQUES.nord.length)
       return openDetail("nord", FRESQUES.nord.length - 1);
-    // galerie nord : dernière partie de l'introduction
-    return showIntro(introPartCount() - 1);
+    // galerie nord : dernière photo de la dernière partie de l'introduction
+    return showIntroLastPhoto(introPartCount() - 1);
   }
   if (currentScreen === "detail") {
     const { side, index } = state;
@@ -825,7 +859,12 @@ function goBackward() {
     return showGallery(side);
   }
   if (currentScreen === "outro") {
-    // clôture : retour à la dernière fresque sud
+    // photo agrandie : photo précédente, ou retour à la page de clôture
+    if (isLightboxOpen()) {
+      if (lightboxIndex > 0) return openLightbox(lightboxIndex - 1);
+      return closeLightbox();
+    }
+    // page de clôture : retour à la dernière fresque sud
     if (FRESQUES.sud.length) return openDetail("sud", FRESQUES.sud.length - 1);
     return showGallery("sud");
   }
@@ -877,24 +916,12 @@ const FORWARD_KEYS = ["ArrowRight", "ArrowDown", "PageDown"];
 const BACKWARD_KEYS = ["ArrowLeft", "ArrowUp", "PageUp"];
 
 document.addEventListener("keydown", (e) => {
-  // fenêtre d'agrandissement ouverte : elle capte toute la navigation
-  if (isLightboxOpen()) {
-    if (e.key === "Escape" || e.key === "Backspace") {
-      e.preventDefault();
-      closeLightbox();
-    } else if (FORWARD_KEYS.includes(e.key)) {
-      e.preventDefault();
-      openLightbox(lightboxIndex + 1);
-    } else if (BACKWARD_KEYS.includes(e.key)) {
-      e.preventDefault();
-      openLightbox(lightboxIndex - 1);
-    }
-    return;
-  }
-
+  // Les photos agrandies (introduction, clôture) font partie du parcours :
+  // goForward / goBackward les enchaînent ; Échap referme seulement la fenêtre.
   if (e.key === "Escape" || e.key === "Backspace") {
     e.preventDefault();
-    if (currentScreen === "detail") showScreen("gallery");
+    if (isLightboxOpen()) closeLightbox();
+    else if (currentScreen === "detail") showScreen("gallery");
     else if (currentScreen === "outro") showGallery("sud");
     else if (currentScreen === "gallery") showIntro(introPartCount() - 1);
     else if (currentScreen === "intro") showScreen("home");
