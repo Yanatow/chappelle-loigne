@@ -869,6 +869,8 @@ document
    → / ↓ / Page suivante  = écran ou fresque suivante
    ← / ↑ / Page précédente = écran ou fresque précédente
    Échap / Retour arrière  = remonter d'un niveau
+   B                       = plein écran / quitter le plein écran (cf. section
+                             « Plein écran » plus bas)
    Le parcours suit l'ordre : accueil, intro, galerie, puis chaque
    fresque du versant nord et du versant sud. */
 const FORWARD_KEYS = ["ArrowRight", "ArrowDown", "PageDown"];
@@ -954,6 +956,17 @@ if (fullscreenEnabled()) {
 } else {
   fullscreenBtn.hidden = true;
 }
+
+/* Touche « B » : même effet que F11 (entrer / sortir du plein écran).
+   Les modificateurs (Ctrl, Alt, Meta) sont ignorés pour ne pas court-circuiter
+   les raccourcis du navigateur (ex. Ctrl+B = favoris). */
+document.addEventListener("keydown", (e) => {
+  if (e.key !== "b" && e.key !== "B") return;
+  if (e.ctrlKey || e.altKey || e.metaKey) return;
+  if (!fullscreenEnabled()) return;
+  e.preventDefault();
+  toggleFullscreen();
+});
 
 /* ─────────────── Vidéo de restitution : son verrouillé ───────────────
    La vidéo de l'écran détail est purement visuelle. Son son est coupé en
