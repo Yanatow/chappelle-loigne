@@ -8,6 +8,9 @@
      titre             titre affiché sur la card et l écran de détail
      descriptionCourte sous-titre de la card et de l écran de détail
      descriptionLongue texte du parchemin à droite des deux photos
+     descriptionSecondaire (optionnel) texte en gras affiché sous le
+                       texte du parchemin ; ses retours à la ligne (\n)
+                       sont respectés à l affichage
      son               (optionnel) commentaire audio lancé à l ouverture
                        du détail, ex. "sound/image7.mp3". Sans ce champ
                        la fresque est silencieuse et les boutons son sont
@@ -291,6 +294,8 @@ const FRESQUES_DATA = {
       descriptionCourte: "Panneau 22 · La prophétesse",
       descriptionLongue:
         "La sibylle Europa porte un glaive évoquant le massacre des Innocents et, par association, la fuite en Égypte. Dès le IIIe siècle av. J.-C. circulent en Méditerranée des livres connus sous le nom d'Oracles sibyllins, mêlant oracles antiques, oracles juifs et écrits chrétiens : les premiers chrétiens se sont peu à peu emparés de la sibylle et ont intégré sa prophétie dans leur littérature religieuse.",
+      descriptionSecondaire:
+        "Sibille\nIesus sur les bras de sa mere\ndeuers egipte senfuyra\npar le vouloir de dieu sō pere\nen icelle part tournera",
     },
     {
       photo: "sud/23.jpg",
@@ -309,6 +314,8 @@ const FRESQUES_DATA = {
       descriptionCourte: "Panneau 24 · La vie publique du Christ",
       descriptionLongue:
         "Sur ce panneau et le suivant, Jésus chasse les marchands du Temple : le Temple de Jérusalem, dit-il, est la maison de Dieu et non pas un repaire de marchands.",
+      descriptionSecondaire:
+        "Iesus par\nung expres\nexemple …\n… sa maison\nles marchands hors du temple\n",
     },
     {
       photo: "sud/25.jpg",
@@ -327,6 +334,7 @@ const FRESQUES_DATA = {
       descriptionCourte: "Panneau 28 · Le fondateur de la chapelle",
       descriptionLongue:
         "Première scène de la rangée du haut, presque entièrement disparue : le fondateur, François Mauguy, s'y est fait représenter implorant la miséricorde divine. Sur le cartouche est écrit : « Mon Dieu, des grands travaux faits en ce lieu, si tu veux bien avoir santé de ma goutte. » Le dessin de la scène a été retrouvé dans une archive.",
+      descriptionSecondaire: "...\ngoutte",
     },
     {
       photo: "sud/29.jpg",
@@ -336,6 +344,8 @@ const FRESQUES_DATA = {
       descriptionCourte: "Panneau 29 · La parabole",
       descriptionLongue:
         "Ce panneau représente la parabole de la paille et de la poutre : « Pourquoi vois-tu la paille dans l'œil de ton frère, alors que la poutre dans ton œil à toi, tu ne la remarques pas ? »",
+      descriptionSecondaire:
+        "Iesus disoyt amy cōment dis tu\na ton prochain quil oste le festu\nhors de sō œil et napercois la poultre\ndedās le tiē dōt ne peux veoir pl9 oultre",
     },
     {
       photo: "sud/30.jpg",
@@ -345,6 +355,8 @@ const FRESQUES_DATA = {
       descriptionCourte: "Panneau 30 · Le carême",
       descriptionLongue:
         "Sur ce panneau et le suivant, Jésus, au sortir de quarante jours de jeûne — le carême —, rencontre le démon qui le tente : il lui présente du pain, des richesses, des maisons, le pouvoir symbolisé par le temple. « Si tu m'adores, je te donne tout cela », lui dit-il. Jésus lui répond que l'homme vit essentiellement de la parole de Dieu et non des richesses du monde.",
+      descriptionSecondaire:
+        "Le bon iesus fust au desert mene\na celle fin quil fust tente du dyable\nqui par trois fois assault luy a dōne\n… iable",
     },
     {
       photo: "sud/31.jpg",
@@ -354,6 +366,8 @@ const FRESQUES_DATA = {
       descriptionCourte: "Panneau 31 · Le carême",
       descriptionLongue:
         "Suite de la tentation du Christ : à toutes les offres du démon — le pain, les richesses, le pouvoir —, Jésus oppose la même réponse : l'homme vit essentiellement de la parole de Dieu, et non des richesses du monde.",
+      descriptionSecondaire:
+        "Mais le saulueur constant et veritable\nchassa le diable et vaincquit sa malice\nles anges lors du haut ciel perdurable\nvindrent a luy pour luy faire seruice\n",
     },
     {
       photo: "sud/32.jpg",
@@ -363,6 +377,7 @@ const FRESQUES_DATA = {
       descriptionCourte: "Panneau 32 · L'Ancien Testament",
       descriptionLongue:
         "Schadrac, Méschac et Abed-Nego, les trois amis de Daniel, refusent d'adorer la statue d'or de Nabuchodonosor : « Notre Dieu peut nous délivrer de la fournaise ardente. » Furieux, le roi fait chauffer la fournaise sept fois plus et les y fait jeter, liés. Effrayé, il s'écrie alors : « Je vois quatre hommes sans liens qui marchent au milieu du feu, et la figure du quatrième ressemble à celle d'un fils de Dieu. »",
+      descriptionSecondaire: "…\nmais dieu enfin deliure ses amis",
     },
     {
       photo: "sud/33.jpg",
@@ -372,6 +387,8 @@ const FRESQUES_DATA = {
       descriptionCourte: "Panneau 33 · L'Ancien Testament",
       descriptionLongue:
         "Déporté adolescent à Babylone, Daniel gagne par sa sagesse la confiance de Nabuchodonosor, dont il interprète les songes, puis celle du roi mède Darius après la chute de Babylone. Tombé en disgrâce par la faute de ses ennemis, il est jeté en pâture aux lions ; fidèle à sa foi, il échappe miraculeusement au supplice et se voit gracié. On lui attribue aussi d'avoir sauvé l'honneur de Suzanne, injustement accusée.",
+      descriptionSecondaire:
+        "Le grāt dragō auec lidole bel\nfurent destruictz par le bon daniel\ndedans le lac aux lyons il est mis\npour le nourrir est habacuc cōmis\n",
     },
     {
       photo: "sud/34.jpg",
@@ -381,6 +398,8 @@ const FRESQUES_DATA = {
       descriptionCourte: "Panneau 34 · L'Ancien Testament",
       descriptionLongue:
         "Dieu demande à Abraham d'offrir son fils Isaac en holocauste sur le mont Moriah. Après trois jours de marche, Abraham élève un autel, dispose les bûches et lie son fils. Alors qu'il tend la main pour immoler Isaac, un ange lui crie d'épargner l'enfant : un bélier pris au piège dans un fourré est sacrifié à sa place. L'ange bénit Abraham et promet que toutes les nations de la terre se béniront en sa descendance.",
+      descriptionSecondaire:
+        "Dieu cōmāda a abraham de faire\nde son enfant Isaac sacrifice\nau mādemēt voulāt doncq satisfaire\ndieu fut cōtent de sa foy et iustice",
     },
     {
       photo: "sud/35.jpg",
@@ -390,6 +409,8 @@ const FRESQUES_DATA = {
       descriptionCourte: "Panneau 35 · L'Ancien Testament",
       descriptionLongue:
         "Job est dévêtu, assis sur un tas de fumier ; au-dessus de lui, le démon le frappe de la lèpre, et à sa droite sa femme lui parle. Patriarche étranger à Israël, Job est le type du juste : « intègre, droit, craignant Dieu et éloigné du mal ». Privé de tous ses biens puis frappé dans sa chair, il ne maudit pas Dieu — son amour est sans calcul : « Nous recevons le bien de Dieu, et nous ne recevrions pas aussi le mal ? »",
+      descriptionSecondaire:
+        "Iob p... d... ...es et de dieu licence\nen corps et biens a persecution\nses enfans perd . et sa fēme quxi tance\n…",
     },
   ],
 

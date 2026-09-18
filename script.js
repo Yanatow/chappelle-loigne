@@ -582,6 +582,13 @@ function openDetail(side, index) {
   document.getElementById("btn-next").disabled = isLastFresque(side, index);
   document.getElementById("detail-description").textContent =
     f.descriptionLongue || "";
+  // texte secondaire optionnel, en gras, avec son titre ; masqués s'il est absent
+  const secondary = document.getElementById("detail-description-secondary");
+  secondary.textContent = f.descriptionSecondaire || "";
+  secondary.hidden = !f.descriptionSecondaire;
+  document.getElementById("detail-secondary-title").hidden =
+    !f.descriptionSecondaire;
+  detailScreen.querySelector(".detail-text").scrollTop = 0;
   alignDetailLeft();
 
   const left = document.getElementById("detail-img-left");

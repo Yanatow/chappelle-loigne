@@ -175,7 +175,13 @@
       </figure>
       <div class="parchment-sheet-wrap detail-parchment-wrap">
         <div class="parchment-sheet">
-          <p id="detail-description"></p>
+          <div class="detail-text">
+            <p id="detail-description"></p>
+            <!-- Texte secondaire optionnel (data.js → descriptionSecondaire),
+                 en gras, retours à la ligne respectés, précédé d'un titre souligné -->
+            <h3 id="detail-secondary-title" class="detail-secondary-title" hidden>Texte déchiffré :</h3>
+            <p id="detail-description-secondary" class="detail-description-secondary" hidden></p>
+          </div>
         </div>
       </div>
     </div>

@@ -949,11 +949,12 @@ body::before {
 .detail-header {
   position: relative;
   width: 100%;
-  max-width: 1700px;
   display: grid;
   grid-template-columns: 1.5fr 1.5fr 1fr;
   align-items: center;
   gap: clamp(1rem, 2.4vmin, 2.2rem);
+  /* même retrait à gauche que .detail-images (voir --detail-tilt-room) */
+  padding-left: var(--detail-tilt-room);
 }
 
 /* Coin gauche de l'en-tête : bouton Retour, puis commandes du son.
@@ -1080,6 +1081,8 @@ body::before {
 #screen-detail.text-hidden .detail-images,
 #screen-detail.text-hidden .detail-header {
   grid-template-columns: 1fr 1fr;
+  /* la photo de droite, inclinée en miroir, déborde aussi vers la droite */
+  padding-right: var(--detail-tilt-room);
 }
 
 /* colonnes plus larges : inclinaison adoucie pour que la photo de
@@ -1126,18 +1129,27 @@ body::before {
 }
 
 /* Diptyque entrouvert + parchemin : les deux photos se font face
-   en 3D, la description occupe au plus un quart de la largeur */
+   en 3D, la description occupe au plus un quart de la largeur.
+   La grille prend toute la largeur de l'écran (moins le padding de
+   .screen) ; la photo de gauche, inclinée, déborde de sa colonne vers
+   la gauche : un retrait proportionnel (--detail-tilt-room) lui laisse
+   la place pour que son bord visible reste dans le padding de l'écran */
+#screen-detail {
+  --detail-tilt-room: 2.6%;
+}
+
 .detail-images {
   display: grid;
   grid-template-columns: 1.5fr 1.5fr 1fr;
   gap: clamp(1rem, 2.4vmin, 2.2rem);
   width: 100%;
-  max-width: 1700px;
   flex: 1;
   min-height: 0;
   align-items: center;
-  padding: 2.5vmin 0 0.5vmin;
-  perspective: 1600px;
+  padding: 2.5vmin 0 0.5vmin var(--detail-tilt-room);
+  /* la perspective suit la largeur au-delà de 1920px : l'inclinaison
+     garde les mêmes proportions sur les très grands écrans */
+  perspective: max(1600px, 83vw);
 }
 
 .detail-figure {
@@ -1167,11 +1179,12 @@ body::before {
   transform: rotate(-0.4deg);
 }
 
-/* Cartouche de l'écran détail : à droite des photos, légèrement décalé */
+/* Cartouche de l'écran détail : à droite des photos, légèrement décalé,
+   sur toute la hauteur de la rangée (du haut des photos au bas des légendes) */
 .detail-parchment-wrap {
-  height: 92%;
+  height: 100%;
   /* écart supplémentaire avec les photos, sans toucher à l'écart entre elles */
-  margin-left: clamp(1.5rem, 3vw, 3.5rem);
+  margin-left: clamp(1.5rem, 1vw, 3.5rem);
 }
 
 .parchment-sheet {
@@ -1179,7 +1192,9 @@ body::before {
   min-height: 0;
   display: flex;
   flex-direction: column;
-  padding: clamp(2rem, 4.4vmin, 3.6rem) clamp(1.9rem, 3.8vmin, 3.2rem);
+  /* haut et côtés resserrés, bas plus généreux */
+  padding: clamp(1.3rem, 2.8vmin, 2.3rem) clamp(1.2rem, 2.4vmin, 2rem)
+    clamp(2rem, 4.4vmin, 3.6rem);
   /* matière : grain fin + nuages de fibres irréguliers (SVG inline),
      deux taches d'usure à peine visibles, base chaude accordée aux
      ors du thème */
@@ -1281,6 +1296,55 @@ body::before {
   font-family: var(--font-display);
   font-size: 1.55em;
   color: #6e2318;
+}
+
+/* Écran détail : les deux textes défilent ensemble dans un même
+   conteneur (le paragraphe seul ne défile plus) */
+.detail-text {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #8a5a2e transparent;
+}
+.detail-text::-webkit-scrollbar {
+  width: 6px;
+}
+.detail-text::-webkit-scrollbar-thumb {
+  background: #8a5a2e;
+  border-radius: 999px;
+}
+.detail-text p {
+  flex: none;
+  overflow: visible;
+}
+
+/* Texte secondaire optionnel (data.js → descriptionSecondaire) :
+   en gras, sous le texte principal, retours à la ligne respectés,
+   sans lettrine */
+.parchment-sheet .detail-secondary-title {
+  margin: 1em 0 0.35em;
+  font-family: "Gotique", var(--font-body);
+  font-size: clamp(1.1rem, 1.6vw, 1.5rem);
+  line-height: 1.3;
+  letter-spacing: 0.08em;
+  word-spacing: 0.12em;
+  font-weight: 700;
+  color: #3b2716;
+  text-align: left;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.15em;
+}
+.parchment-sheet .detail-description-secondary {
+  margin-top: 0;
+  font-weight: 700;
+  white-space: pre-line;
+}
+.parchment-sheet .detail-description-secondary::first-letter {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
 }
 
 /* Message d'erreur si fresques.json est introuvable */
@@ -1628,6 +1692,10 @@ body::before {
   }
   .detail-images > * {
     transform: none !important;
+  }
+  /* plus d'inclinaison : plus de retrait à gauche */
+  #screen-detail {
+    --detail-tilt-room: 0px;
   }
   .outro-header {
     grid-template-columns: 1fr;
